@@ -162,18 +162,44 @@ class GameServlet extends ScalatraServlet {
             }).map(_.asInstanceOf[PlayerFinishAttackAct])
             val (possiblyCombatChained, msg) = if (otherStart.isDefined && otherAttack.isDefined && otherAttack.get.timestamp > otherStart.get.timestamp) {
               // execute combat
-              val (startA, startB, outcome) = GameUtils.combat(act, otherAttack.get)
-              val combatChained = gameChained.copy(chain = CombatAct(playerId, otherId, startA, startB, actionsJson, otherAttack.get.actionsString, outcome) :: gameChained.chain)
+              val (startA, startB, outcome) = GameUtils.combat(act, otherAttack.get, game.objects)
+              val combatChained = gameChained.copy(chain =
+                CombatAct(playerId, otherId, startA, startB, actionsJson, otherAttack.get.actionsString, outcome) :: gameChained.chain)
 
-              val deadChained = if (outcome.dead.size > 0) {
-                //TODO process deaths
-                (gameChained, "200 some died?")
-              } else combatChained
-              (combatChained, "200 both live")
+              if (outcome.dead.size > 0) {
+                // process deaths
+                if (outcome.dead.size == 1) {
+                  val deadId = outcome.dead(0)
+                  val aliveId = outcome.alive(0)
+                  val oneDead = combatChained.copy(
+                    stats = combatChained.stats +
+                      (deadId -> combatChained.stats(playerId).copy(alive = false)) +
+                      (aliveId -> (combatChained.stats(otherId).copy(
+                        kills = deadId :: combatChained.stats(otherId).kills))),
+                    holding = combatChained.holding + (aliveId -> (combatChained.holding(aliveId) ++ combatChained.holding(deadId))) + (deadId -> List()))
+
+                  (oneDead, "200  " + game.players(deadId).name + "died")
+                } else { // both died
+                  val bothDied = combatChained.copy(
+                    stats = combatChained.stats +
+                      (playerId -> (combatChained.stats(playerId).copy(alive = false,
+                        kills = otherId :: combatChained.stats(playerId).kills))) +
+                        (otherId -> (combatChained.stats(otherId).copy(alive = false,
+                          kills = playerId :: combatChained.stats(otherId).kills))),
+                    holding = combatChained.holding + (playerId -> List()) + (otherId -> List()))
+                  val room = bothDied.map.rooms(roomOwnIdx)
+                  bothDied.map.rooms(roomOwnIdx) = room.copy(objects = room.objects ++ combatChained.holding(playerId) ++ combatChained.holding(otherId))
+
+                  (bothDied, "200 both died")
+                }
+              } else (combatChained, "200 nobody died")
             } else (gameChained, "200 awaiting other player")
 
             games += gameId -> possiblyCombatChained
-            msg
+            if (possiblyCombatChained.stats.values.filter(_.alive).size <= 1)
+              "200 finished"
+            else
+              msg
           }
         }
       }

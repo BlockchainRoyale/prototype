@@ -9,14 +9,16 @@ import javax.xml.crypto.Data
 import org.eclipse.jetty.servlet.ServletHandler
 
 object Server {
-  val server = new org.eclipse.jetty.server.Server(7341);
+  def main(arg: Array[String]) = {
+    val server = new org.eclipse.jetty.server.Server(8822);
 
-  val gameServlet = new ServletHolder(new GameServlet());
-  val context = new ServletHandler();
-  context.addServlet(gameServlet)
+    val gameServlet = new ServletHolder(new GameServlet());
+    val context = new ServletHandler();
+    context.addServlet(gameServlet)
 
-  server.setHandler(context)
-  server.start
-  System.out.println("Started: 8822");
-  server.join
+    server.setHandler(context)
+    server.start
+    System.out.println("Started: 8822");
+    server.join
+  }
 }

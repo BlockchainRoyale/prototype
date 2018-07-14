@@ -289,17 +289,18 @@ object GameUtils {
       (if (actA.isInstanceOf[UsePA] && !hasShield(actA)) ShootPA(dirA, actA.asInstanceOf[UsePA].obj) else actA) match {
         case MovePA(dir) => newPosA = (currentA._1 + dir._1, currentA._2 + dir._2)
         case ShootPA(dir, objId) =>
-          objects(objId)._type match {
+          val objType = objects(objId)._type
+          objType match {
             case Gun | Grenade => if (dir._1 == 0) {
               if (currentA._1 == currentB._1) {
                 if (Math.signum(currentA._2 - currentB._2).toInt == dir._2) {
-                  if (hasShield(actB)) { /* blocked! */ } else bDead = true
+                  if (hasShield(actB) && objType != Grenade) { /* blocked! */ } else bDead = true
                 }
               } else { /* noop*/ }
             } else { // dir._2 == 0
               if (currentA._2 == currentB._2) {
                 if (Math.signum(currentA._1 - currentB._1).toInt == dir._1) {
-                  if (hasShield(actB)) { /* blocked! */ } else bDead = true
+                  if (hasShield(actB) && objType != Grenade) { /* blocked! */ } else bDead = true
                 }
               } else { /* noop*/ }
             }
@@ -333,17 +334,18 @@ object GameUtils {
       (if (actB.isInstanceOf[UsePA] && !hasShield(actB)) ShootPA(dirB, actB.asInstanceOf[UsePA].obj) else actB) match {
         case MovePA(dir) => newPosB = (currentB._1 + dir._1, currentB._2 + dir._2)
         case ShootPA(dir, objId) =>
-          objects(objId)._type match {
+          val objType = objects(objId)._type
+          objType match {
             case Gun | Grenade => if (dir._1 == 0) {
               if (currentB._1 == currentA._1) {
                 if (Math.signum(currentB._2 - currentA._2).toInt == dir._2) {
-                  if (hasShield(actA)) { /* blocked! */ } else aDead = true
+                  if (hasShield(actA) && objType != Grenade) { /* blocked! */ } else aDead = true
                 }
               } else { /* noop*/ }
             } else { // dir._2 == 0
               if (currentB._2 == currentA._2) {
                 if (Math.signum(currentB._1 - currentA._1).toInt == dir._1) {
-                  if (hasShield(actA)) { /* blocked! */ } else aDead = true
+                  if (hasShield(actA) && objType != Grenade) { /* blocked! */ } else aDead = true
                 }
               } else { /* noop*/ }
             }
