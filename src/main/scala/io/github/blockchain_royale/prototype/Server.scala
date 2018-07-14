@@ -14,7 +14,7 @@ object Server {
 
     val gameServlet = new ServletHolder(new GameServlet());
     val context = new ServletHandler();
-    context.addServlet(gameServlet)
+    context.addServletWithMapping(gameServlet, "/*")
 
     server.setHandler(context)
     server.start

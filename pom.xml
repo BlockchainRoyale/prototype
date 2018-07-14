@@ -162,7 +162,7 @@
 				<configuration>
 					<programs>
 						<program>
-							<mainClass>io.github.blockchain_royale.prototype.Server$</mainClass>
+							<mainClass>io.github.blockchain_royale.prototype.Server</mainClass>
 							<name>server</name>
 						</program>
 					</programs>
