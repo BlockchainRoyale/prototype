@@ -234,7 +234,157 @@ object GameUtils {
 
   def hash(str: String): String = DigestUtils.sha1Hex(str)
 
-  def combat(a: PlayerFinishAttackAct, b: PlayerFinishAttackAct): Tuple3[Coord, Coord, Outcome] = {
-    ((0, 0), (1, 1), Outcome(List(a.player, b.player), List()))
+  def combat(a: PlayerFinishAttackAct, b: PlayerFinishAttackAct, objects: Map[ObjectId, Object]): Tuple3[Coord, Coord, Outcome] = {
+    val hashed = GameUtils.hash(a.actionsString + b.actionsString)
+    val startAopt = (hashed(0).toInt % MAP_SIZE, hashed(1).toInt % MAP_SIZE)
+    val startB = (hashed(2).toInt % MAP_SIZE, hashed(3).toInt % MAP_SIZE)
+    // slight advantage to player 1 to entice submitting actions fast
+    val startA = if (startAopt == startB) (startAopt._1, (startAopt._2 + 1) % MAP_SIZE) else startAopt
+    var currentA = startA
+    var currentB = startB
+    var dirA: Tuple2[Int, Int] = null
+    var dirB: Tuple2[Int, Int] = null
+    // start facing each other
+    def faceDir(person: Coord, other: Coord): Tuple2[Int, Int] = {
+      val diff1 = person._1 - other._1
+      val diff2 = person._2 - other._2
+      if (Math.abs(diff1) > Math.abs(diff2)) {
+        (Math.signum(diff1).toInt, 0)
+      } else {
+        (0, Math.signum(diff2).toInt)
+      }
+    }
+    def turnFacing(dir: Tuple2[Int, Int], target: Tuple2[Int, Int]): Tuple2[Int, Int] = (dir, target) match {
+      case ((-1, 0), (1, 0))  => (0, 1)
+      case ((-1, 0), (0, 1))  => (-1, 0)
+      case ((-1, 0), (0, -1)) => (-1, 0)
+      case ((1, 0), (-1, 0))  => (0, 1)
+      case ((1, 0), (0, 1))   => (1, 0)
+      case ((1, 0), (0, -1))  => (1, 0)
+
+      case ((0, -1), (1, 0))  => (0, -1)
+      case ((0, -1), (0, 1))  => (1, 0)
+      case ((0, -1), (-1, 0)) => (-1, 0)
+      case ((0, 1), (-1, 0))  => (-1, 0)
+      case ((0, 1), (1, 0))   => (1, 0)
+      case ((0, 1), (0, -1))  => (1, 0)
+    }
+
+    dirA = faceDir(currentA, currentB)
+    dirB = (dirA._1 * -1, dirA._2 * -1)
+
+    val actionsA = a.actions
+    val actionsB = b.actions
+    for ((actA, actB) <- actionsA.zip(actionsB)) {
+      var aDead = false
+      var bDead = false
+      var newPosA = currentA
+      var newPosB = currentB
+
+      def hasShield(act: PlayerAction) = act match {
+        case UsePA(objId2) => objects(objId2)._type == Shield
+        case _             => false
+      }
+
+      (if (actA.isInstanceOf[UsePA] && !hasShield(actA)) ShootPA(dirA, actA.asInstanceOf[UsePA].obj) else actA) match {
+        case MovePA(dir) => newPosA = (currentA._1 + dir._1, currentA._2 + dir._2)
+        case ShootPA(dir, objId) =>
+          objects(objId)._type match {
+            case Gun | Grenade => if (dir._1 == 0) {
+              if (currentA._1 == currentB._1) {
+                if (Math.signum(currentA._2 - currentB._2).toInt == dir._2) {
+                  if (hasShield(actB)) { /* blocked! */ } else bDead = true
+                }
+              } else { /* noop*/ }
+            } else { // dir._2 == 0
+              if (currentA._2 == currentB._2) {
+                if (Math.signum(currentA._1 - currentB._1).toInt == dir._1) {
+                  if (hasShield(actB)) { /* blocked! */ } else bDead = true
+                }
+              } else { /* noop*/ }
+            }
+            // TODO: grenade, with radious
+            case _ => // noop
+          }
+        case TurnTowardsPlayerPA() =>
+          val targetDir = faceDir(currentA, currentB)
+          if (targetDir == dirA) {
+            // noop
+          } else {
+            dirA = turnFacing(dirA, targetDir)
+          }
+        case MoveForwardPA()  => newPosA = ((currentA._1 + dirA._1 + MAP_SIZE) % MAP_SIZE, (currentA._2 + dirA._2 + MAP_SIZE) % MAP_SIZE)
+        case MoveBackwardPA() => newPosA = ((currentA._1 - dirA._1 + MAP_SIZE) % MAP_SIZE, (currentA._2 - dirA._2 + MAP_SIZE) % MAP_SIZE)
+        case TurnLeftPA() => dirA = dirA match {
+          case (1, 0)  => (0, -1)
+          case (0, -1) => (-1, 0)
+          case (-1, 0) => (0, 1)
+          case (0, 1)  => (1, 0)
+        }
+        case TurnRightPA() => dirA = dirA match {
+          case (1, 0)  => (0, 1)
+          case (0, 1)  => (-1, 0)
+          case (-1, 0) => (0, -1)
+          case (0, -1) => (1, 0)
+        }
+        case UsePA(obj) => // noop
+      }
+
+      (if (actB.isInstanceOf[UsePA] && !hasShield(actB)) ShootPA(dirB, actB.asInstanceOf[UsePA].obj) else actB) match {
+        case MovePA(dir) => newPosB = (currentB._1 + dir._1, currentB._2 + dir._2)
+        case ShootPA(dir, objId) =>
+          objects(objId)._type match {
+            case Gun | Grenade => if (dir._1 == 0) {
+              if (currentB._1 == currentA._1) {
+                if (Math.signum(currentB._2 - currentA._2).toInt == dir._2) {
+                  if (hasShield(actA)) { /* blocked! */ } else aDead = true
+                }
+              } else { /* noop*/ }
+            } else { // dir._2 == 0
+              if (currentB._2 == currentA._2) {
+                if (Math.signum(currentB._1 - currentA._1).toInt == dir._1) {
+                  if (hasShield(actA)) { /* blocked! */ } else aDead = true
+                }
+              } else { /* noop*/ }
+            }
+            // TODO: grenade, with radious
+            case _ => // noop
+          }
+        case TurnTowardsPlayerPA() =>
+          val targetDir = faceDir(currentB, currentA)
+          if (targetDir == dirB) {
+            // noop
+          } else {
+            dirB = turnFacing(dirB, targetDir)
+          }
+        case MoveForwardPA()  => newPosB = ((currentB._1 + dirB._1 + MAP_SIZE) % MAP_SIZE, (currentB._2 + dirB._2 + MAP_SIZE) % MAP_SIZE)
+        case MoveBackwardPA() => newPosB = ((currentB._1 - dirB._1 + MAP_SIZE) % MAP_SIZE, (currentB._2 - dirB._2 + MAP_SIZE) % MAP_SIZE)
+        case TurnLeftPA() => dirB = dirB match {
+          case (1, 0)  => (0, -1)
+          case (0, -1) => (-1, 0)
+          case (-1, 0) => (0, 1)
+          case (0, 1)  => (1, 0)
+        }
+        case TurnRightPA() => dirB = dirB match {
+          case (1, 0)  => (0, 1)
+          case (0, 1)  => (-1, 0)
+          case (-1, 0) => (0, -1)
+          case (0, -1) => (1, 0)
+        }
+        case UsePA(obj) => // noop
+      }
+      if (aDead || bDead)
+        return (startA, startB,
+          if (aDead && bDead)
+            Outcome(List(), List(a.player, b.player))
+          else if (aDead)
+            Outcome(List(b.player), List(a.player))
+          else
+            Outcome(List(a.player), List(b.player)))
+      currentA = newPosA
+      currentB = newPosB
+    }
+
+    (startA, startB, Outcome(List(a.player, b.player), List()))
   }
 }
