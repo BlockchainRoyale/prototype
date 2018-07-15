@@ -28,7 +28,6 @@ var playerInfo = [];
 function setup(){
     fillInformation();
     menuSelect();
-
 }
 
 
@@ -200,7 +199,6 @@ function drawArena() {
     ctx.stroke();
 }
 
-function
 /*
 function hash() {
     var arrayStuff = [1, 2, 3, 4, 5];
