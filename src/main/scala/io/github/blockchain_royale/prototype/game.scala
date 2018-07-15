@@ -110,22 +110,21 @@ case class Game(id: GameId,
                 holding: Map[PlayerId, List[ObjectId]] = Map(),
                 stats: Map[PlayerId, Stats] = Map(),
                 map: GameMap,
-                chain: List[GameAction]) {
-  def start: Game = {
+                chain: List[GameAction])
 
+object GameUtils {
+
+  def startGame(game: Game): Game = {
     var objectCount = 0
-    var givenWeapons: Map[PlayerId, ObjectId] = Map()
     var newObjects: Map[ObjectId, Object] = Map()
     var newHolding: Map[PlayerId, List[ObjectId]] = Map()
 
     // given guns
     def newObject(objectId: ObjectId) = Object(objectId, ALL_OBJECTS(Random.nextInt(ALL_OBJECTS.size)))
-    for (_id <- players.keys) {
+    for (_id <- game.players.keys) {
       val objectId = objectCount
       objectCount += 1
-      val weapon = newObject(objectId)
-      givenWeapons += (_id -> objectId)
-      newObjects += (_id -> weapon)
+      newObjects += (objectId -> newObject(objectId))
       newHolding += (_id -> List(objectId))
     }
 
@@ -136,12 +135,12 @@ case class Game(id: GameId,
       val objectId = objectCount
       objectCount += 1
       objectsAtRoom += (coord -> (objectsAtRoom.getOrElse(coord, List()) ++ List(objectId)))
-      newObjects += objectId -> newObject(objectId)
+      newObjects += (objectId -> newObject(objectId))
     }
 
     // pick initial position for players
     var initialPos: Map[Coord, List[PlayerId]] = Map()
-    for (_id <- players.keys) {
+    for (_id <- game.players.keys) {
       val coord = Tuple2(Random.nextInt(MAP_SIZE), Random.nextInt(5))
       initialPos += (coord -> (initialPos.getOrElse(coord, List()) ++ List(_id)))
     }
@@ -156,14 +155,13 @@ case class Game(id: GameId,
       }
     }
 
-    this.copy(objects = newObjects,
+    game.copy(
+      objects = newObjects,
       map = GameMap(rooms.values.toArray),
       holding = newHolding,
-      stats = players.mapValues(v => Stats(true, List())))
+      stats = game.players.mapValues(v => Stats(true, List())))
   }
-}
 
-object GameUtils {
   def toJson(game: Game) = {
     val obj = new JSONObject()
     var players: Map[PlayerId, JSONObject] = Map()

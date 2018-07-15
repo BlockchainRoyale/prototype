@@ -32,7 +32,7 @@ class GameServlet extends ScalatraServlet {
 
       val (potentiallyStartedGame, started) =
         if (newGame.players.size == NUM_PLAYERS)
-          (newGame.start, true)
+          (GameUtils.startGame(newGame), true)
         else
           (newGame, false)
 
