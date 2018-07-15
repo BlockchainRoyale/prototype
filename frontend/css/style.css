@@ -32,8 +32,19 @@ body {
 .jumbotron {
     background:rgba(0,0,0,0.5);
     color: #ffffff;
-    font-size: 10vw;
+
 }
+.jumbotron:hover h1{
+    font-weight: bold;
+}
+.jumbotron:hover {
+    background:rgba(0,0,0,0.7);
+}
+
 h1{
     font-size:7vw;
+}
+
+#thelink {
+    text-decoration: none;
 }
