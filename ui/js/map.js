@@ -30,8 +30,6 @@ function setup(){
     menuSelect();
 }
 
-
-
 var yourLocation = [5,3];
 var yourAddress = "asdf";
 
@@ -199,6 +197,39 @@ function drawArena() {
     ctx.stroke();
 }
 
+var battleInput1 = ["up", "down", "shoot", "left", "shoot", 3];
+var battleInput2 = ["left", "left", "shoot", "right", "shoot", 1];
+var battleloc1 = [0,0];
+var battleloc2 = [3, 5];
+
+function playArena() {
+    for(let i=0; i<battleInput1.length; i++){
+        switch(battleInput1[i]){
+            case "up":
+                battleloc1[1]++;
+                battleloc1[1] = over(battleloc1[1]);
+                break;
+            case "right":
+                battleloc1[0]++;
+                battleloc1[0] = over(battleloc1[0]);
+            case "down":
+                battleloc1[0]--;
+                battleloc1[0] = over(battleloc1[0]);
+            case "left":
+                battleloc1[0]++;
+                battleloc1[0] = over(battleloc1[0]);
+            case "shoot":
+        }
+    }
+}
+
+function over(inNum) {
+    if(inNum>4 ){
+        return 0;
+    }else if(inNum<0){
+        return 4;
+    }
+}
 /*
 function hash() {
     var arrayStuff = [1, 2, 3, 4, 5];
@@ -210,7 +241,6 @@ function menuSelect() {
     var playerInventories = document.getElementById("infoContainer");
     var battleRequest = document.getElementById("battleRequests");
     var selection = document.getElementById("menuSelection").value;
-    console.log("asdf: (" + selection + ")");
     switch(selection){
         case "1":
             console.log("InfoContainer");
