@@ -1,3 +1,6 @@
+body {
+    font-family: 'VT323', monospace;
+}
 #container {
     width: 100%;
     margin: 20px auto 0 auto;
@@ -10,6 +13,14 @@
     margin-left: auto;
     margin-right: auto;
 }
+
+#players-column {
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    text-align: center;
+}
+
 #arena {
     margin: 20px;
     border: 1px solid black;

@@ -2,6 +2,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=VT323" rel="stylesheet">
     <link rel="stylesheet" href="css/index.css">
 </head>
 <body onLoad="setup(), mapRedraw(), playerInfoSetup(), battleRequests()">
@@ -13,7 +14,7 @@
 
         <canvas id="map" height="600px" width="600px"></canvas>
     </div>
-    <div id ="right-column">
+    <div id ="middle-column">
         <div id="arenaContainer">
             <canvas id="arena" height="300px" width="300px"></canvas>
             <div id="battleInfo">asdf</div>
@@ -57,7 +58,7 @@
             <button id="down" class="movebutton"><img src="assets/movement/down-arrow.png"></button>
         </div>
     </div>
-    <div id="players-list">
+    <div id="players-column">
         <h1>PLAYERS LEFT</h1>
         <ul id="listOfPlayers">
             <li><button></button></li>
