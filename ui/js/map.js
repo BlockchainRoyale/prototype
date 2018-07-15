@@ -28,6 +28,7 @@ var playerInfo = [];
 function setup(){
     fillInformation();
     menuSelect();
+
 }
 
 
@@ -50,6 +51,14 @@ const GRIDSIZE = document.getElementById("map").width / 7;
 const MAXSIZE = document.getElementById("map").width;
 const ICONSIZE = GRIDSIZE / 6;
 
+const ASIZE = document.getElementById("arena").width / 5;
+const MAXASIZE = document.getElementById("arena").width;
+const AICONSIZE = ASIZE / 3;
+
+function mapRedraw() {
+    drawMap();
+    drawPlayerLocations();
+}
 function drawMap() {
     var map = document.getElementById("map");
     var ctx = map.getContext("2d");
@@ -169,26 +178,29 @@ function swapCanvas() {
         arena.style.visibility = "hidden";
     }else{
         arena.style.visibility = "visible";
+        drawArena();
     }
 }
 
-function drawMap() {
+function drawArena() {
     var arena = document.getElementById("arena");
-    var ctx = map.getContext("2d");
-    ctx.strokeStyle = "white";
+    var ctx = arena.getContext("2d");
+    ctx.strokeStyle = "black";
     ctx.clearRect(0, 0, arena.width, arena.height);
     ctx.beginPath();
-    for (let x = GRIDSIZE; x < MAXSIZE; x = x + GRIDSIZE) {
+
+    for (let x = ASIZE; x < MAXASIZE; x = x + ASIZE) {
         ctx.moveTo(x, 0);
-        ctx.lineTo(x, MAXSIZE);
+        ctx.lineTo(x, MAXASIZE);
     }
-    for (let y = GRIDSIZE; y < MAXSIZE; y = y + GRIDSIZE) {
+    for (let y = ASIZE; y < MAXASIZE; y = y + ASIZE) {
         ctx.moveTo(0, y);
-        ctx.lineTo(MAXSIZE, y);
+        ctx.lineTo(MAXASIZE, y);
     }
     ctx.stroke();
-    drawPlayerLocations();
 }
+
+function
 /*
 function hash() {
     var arrayStuff = [1, 2, 3, 4, 5];
@@ -219,6 +231,22 @@ function menuSelect() {
             break;
     }
 }
+
+function displayInputs() {
+    var log = document.getElementById("battleInfo");
+    var input = document.getElementById("battleInput");
+    log.style.display = 'none';
+    input.style.display = 'block';
+}
+
+function displayLog() {
+    var log = document.getElementById("battleInfo");
+    var input = document.getElementById("battleInput");
+
+    log.style.display = 'block';
+    input.style.display = 'none';
+}
+
 
 /*
 function fillInformation() {

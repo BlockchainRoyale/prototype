@@ -1,6 +1,36 @@
 #arena {
     margin: 20px;
+    border: 1px solid black;
+    float: left;
 }
+
+#battleInfo {
+    float: left;
+    overflow: scroll;
+    margin: 20px 0px 20px 20px;
+    border: 1px solid black;
+    width: 210px;
+    height: 300px;
+}
+
+#battleInput {
+    float: left;
+    overflow: scroll;
+    margin: 20px 0px 20px 20px;
+    border: 1px solid black;
+    width: 210px;
+    height: 300px;
+    display: none;
+}
+
+#battleBtns {
+    padding: 25px;
+    border: 1px solid black;
+    position: fixed;
+    left: 377px;
+    top: 350px;
+}
+
 
 #arenaContainer {
     position: fixed;
@@ -10,6 +40,8 @@
     border: 5px solid grey;
     visibility: hidden;
     z-index: 1000;
+    height: 450px;
+    width: 600px;
 }
 
 #map {
@@ -24,7 +56,7 @@
     width: 640px;
 }
 
-#battleBtn {
+#showBattle {
     float: left;
     margin: 20px 10px 0 20px;
 }
@@ -66,4 +98,11 @@
 
 #menuSelection {
     margin: 10px 10px 10px 20px;
+}
+
+#requests {
+    overflow: scroll;
+    border: solid black 1px;
+    width: 200px;
+    height: 100px;
 }
