@@ -6,6 +6,9 @@ To build, you need [maven](https://maven.apache.org/):
 mvn package appassembler:assemble
 ```
 
+To start the server navigate to prototype/target/appassembler/bin and run server.bat
+Should see "Started: 8822"
+
 Then interact with the API (see servlet.scala for all the paths available) to create a game:
 
 ```sh
