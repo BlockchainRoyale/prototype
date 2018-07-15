@@ -16,10 +16,52 @@ var dummyData = [
 var playerLocations = [
     [0, 0, 2],
     [0, 1, 0],
+    [0, 2, 0],
+    [0, 3, 0],
+    [0, 4, 0],
+    [1, 5, 0],
+    [1, 6, 0],
+    [1, 0, 0],
+    [1, 1, 0],
+    [1, 2, 3],
+    [1, 3, 0],
+    [1, 4, 0],
+    [2, 0, 3],
+    [2, 1, 0],
+    [2, 2, 0],
+    [2, 3, 0],
     [2, 4, 4],
-    [5, 3, 5],
-    [1, 2, 11],
-    [4, 6, 7]
+    [2, 5, 0],
+    [2, 6, 0],
+    [3, 0, 2],
+    [3, 1, 0],
+    [3, 2, 3],
+    [3, 3, 0],
+    [3, 4, 0],
+    [3, 5, 0],
+    [3, 6, 0],
+    [4, 0, 4],
+    [4, 1, 0],
+    [4, 2, 0],
+    [4, 3, 0],
+    [4, 4, 0],
+    [4, 5, 0],
+    [4, 6, 0],
+    [5, 0, 0],
+    [5, 1, 0],
+    [5, 2, 3],
+    [5, 3, 2],
+    [5, 4, 0],
+    [5, 5, 0],
+    [5, 6, 0],
+    [6, 0, 0],
+    [6, 1, 0],
+    [6, 2, 1],
+    [6, 3, 0],
+    [6, 4, 0],
+    [6, 5, 5],
+    [6, 6, 0],
+
 ];
 
 //Player Information is stored here
@@ -120,7 +162,7 @@ function drawPlayerLocations() {
                 curX = (GRIDSIZE * playerLocations[i][0]) + (((GRIDSIZE / 4.5) - (ICONSIZE / 2)) * xCo);
                 curY = (GRIDSIZE * playerLocations[i][1]) + (((GRIDSIZE / 4.5) - (ICONSIZE / 2)) * yCo);
                 if (playerLocations[i][0] == yourLocation[0] && playerLocations[i][1] == yourLocation[1] && !alreadyHere) {
-                    ctx.fillStyle = colors[4];
+                    ctx.fillStyle = colors[5];
                     alreadyHere = true;
                 } else {
                     ctx.fillStyle = colors[0];
