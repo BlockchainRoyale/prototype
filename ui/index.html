@@ -25,7 +25,7 @@
             <select style="z-index: 100" id="playerInfoInput" onchange="playerInformation()"></select>
         </div>
 
-        <div id="battleRequests" >
+        <div id="battleRequests">
             <h3>Battle Requests</h3>
             <div style="overflow:scroll; border: solid black 1px; width: 200px; height: 100px" id="requests"></div>
         </div>
@@ -37,15 +37,16 @@
         </select>
     </div>
 
-    <div id="uiButtons">
+    <div id="uiButtons" class="float-right">
         <button id="battleBtn" onclick="swapCanvas()">Show Battle</button>
     </div>
 
-    <div id="movement" width="100px" height="50px" >
-        <button id="up" style="position: relative; left:27px; margin-bottom: 5px;"><b>^</b></button><br>
-        <button id="left"><b><</b></button>
-        <button id="down"><b>v</b></button>
-        <button id="right"><b>></b></button>
+    <div id="movement" class="float-right">
+        <button id="up" class="movebutton"><img src="assets/movement/up-arrow.png"> </button><br>
+        <button id="left" class="movebutton"><img src="assets/movement/left-arrow.png"></button>
+        <div id = "centerbutton"></div>
+        <button id="right" class="movebutton"><img src="assets/movement/right-arrow.png"></button>
+        <button id="down" class="movebutton"><img src="assets/movement/down-arrow.png"></button>
     </div>
 
 </div>

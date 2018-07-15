@@ -49,13 +49,44 @@
 }
 
 #movement {
+    margin-top: 10%;
     border: 1px solid black;
     padding: 10px;
-    position: fixed;
-    top: 580px;
-    left: 720px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
 }
 
+#up {
+    grid-column-start: 2;
+    border-radius:5px 5px 0 0;
+}
+
+#right {
+    grid-column-start: 3;
+    border-radius: 0 5px 5px 0;
+}
+
+#down {
+    grid-row-start: 3;
+    grid-column-start: 2;
+    border-radius: 0 0 5px 5px;
+}
+
+#left{
+    border-radius: 5px 0 0 5px;
+}
+
+#centerbutton {
+    background-color: #d7dae0;
+}
+.movebutton {
+    border: none;
+    background-color: #d7dae0;
+}
+
+.float-right {
+    float: right;
+}
 #battleRequests {
     float: left;
     margin: 20px;
