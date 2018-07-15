@@ -4,7 +4,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="css/index.css">
 </head>
-<body onLoad="setup(), drawMap(), playerInfoSetup(), battleRequests()">
+<body onLoad="setup(), mapRedraw(), playerInfoSetup(), battleRequests()">
 <div id="container" style="border: solid black 1px; width: 950px; height: 700px">
     <div id="mapContainer" >
         <img src="assets/TooManyRedT.png" id="TooManyR" style="display:none">
@@ -12,8 +12,14 @@
 
         <canvas id="map" height="600px" width="600px"></canvas>
     </div>
-    <div id="arenaContainer" height="500px" width="500px">
-        <canvas id="arena" height="460px" width="460px"></canvas>
+    <div id="arenaContainer">
+        <canvas id="arena" height="300px" width="300px"></canvas>
+        <div id="battleInfo">asdf</div>
+        <div id="battleInput"></div>
+        <div id="battleBtns">
+            <button id="battleLogbtn" onclick="displayLog()">Log</button>
+            <button id="battleInputbtn" onclick="displayInputs()">Input</button>
+        </div>
     </div>
     <div id="menu" height="500px">
         <!--Player Info-->
@@ -27,7 +33,7 @@
 
         <div id="battleRequests">
             <h3>Battle Requests</h3>
-            <div style="overflow:scroll; border: solid black 1px; width: 200px; height: 100px" id="requests"></div>
+            <div  id="requests"></div>
         </div>
         <select id="menuSelection" onchange="menuSelect()">
             <option value="1">Player Info</option>
@@ -37,8 +43,8 @@
         </select>
     </div>
 
-    <div id="uiButtons" class="float-right">
-        <button id="battleBtn" onclick="swapCanvas()">Show Battle</button>
+    <div id="uiButtons">
+        <button id="showBattle" onclick="swapCanvas()">Show Battle</button>
     </div>
 
     <div id="movement" class="float-right">
