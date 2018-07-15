@@ -7,21 +7,10 @@ import org.json.JSONTokener
 import org.json.JSONObject
 import org.apache.commons.codec.digest.DigestUtils
 
-sealed abstract class ObjectType {
-  val name: String
-}
-
-object Gun extends ObjectType {
-  val name = "Gun"
-}
-
-object Grenade extends ObjectType {
-  val name = "Grenade"
-}
-
-object Shield extends ObjectType {
-  val name = "Shield"
-}
+sealed abstract class ObjectType { val name: String }
+object Gun extends ObjectType { val name = "Gun" }
+object Grenade extends ObjectType { val name = "Grenade" }
+object Shield extends ObjectType { val name = "Shield" }
 
 object Types {
   type PlayerId = Int
@@ -59,7 +48,28 @@ case class TurnLeftPA() extends PlayerAction
 case class TurnRightPA() extends PlayerAction
 case class UsePA(obj: ObjectId) extends PlayerAction
 
-case class Outcome(alive: List[PlayerId], dead: List[PlayerId])
+case class Outcome(alive: List[PlayerId], dead: List[PlayerId], game: List[Tuple4[Coord, Coord, Coord, Coord]]) {
+  def toJsonObject(): JSONObject = {
+    val obj = new JSONObject()
+    val aliveArr = new JSONArray()
+    for (a <- alive) aliveArr.put(a)
+    obj.put("alive", aliveArr)
+    val deadArr = new JSONArray()
+    for (d <- dead) deadArr.put(d)
+    obj.put("dead", deadArr)
+    val gameArr = new JSONArray()
+    for ((aPos, aDir, bPos, bDir) <- game) {
+      val row = new JSONObject()
+      row.put("a_row", aPos._1); row.put("a_col", aPos._2)
+      row.put("b_row", bPos._1); row.put("b_col", bPos._2)
+      row.put("a_dir", aDir.toString)
+      row.put("b_dir", bDir.toString)
+      gameArr.put(row)
+    }
+    obj.put("game", gameArr)
+    obj
+  }
+}
 
 // game actions, for the chain
 sealed abstract class GameAction {
@@ -86,7 +96,7 @@ case class PlayerMoveGA(player: PlayerId, dir: String) extends GameAction {
   def extra(obj: JSONObject) = { obj.put("player", player); obj.put("dir", dir) }
 }
 case class PlayerPickGA(player: PlayerId, obj: ObjectId) extends GameAction {
-  def extra(obj: JSONObject) = { obj.put("player", player); obj.put("obj", obj) }
+  def extra(jsonObj: JSONObject) = { jsonObj.put("player", player); jsonObj.put("obj", obj) }
 }
 case class PlayerStartAttackGA(player: PlayerId, other: PlayerId, actionsHash: String) extends GameAction {
   def extra(obj: JSONObject) = { obj.put("player", player); obj.put("other", other); obj.put("hash", actionsHash); }
@@ -131,7 +141,7 @@ case class CombatGA(a: PlayerId, b: PlayerId, startA: Coord, startB: Coord, acti
     obj.put("startA_col", startA._2)
     obj.put("startB_row", startB._1)
     obj.put("startB_col", startB._2)
-    obj.put("outcome", outcome)
+    obj.put("outcome", outcome.toJsonObject())
   }
 }
 
@@ -174,7 +184,7 @@ object GameLogic {
     // pick initial position for players
     var initialPos: Map[Coord, List[PlayerId]] = Map()
     for (_id <- game.players.keys) {
-      val coord = Tuple2(Random.nextInt(MAP_SIZE), Random.nextInt(5))
+      val coord = Tuple2(Random.nextInt(MAP_SIZE), Random.nextInt(MAP_SIZE))
       initialPos += (coord -> (initialPos.getOrElse(coord, List()) ++ List(_id)))
     }
 
@@ -210,10 +220,10 @@ object GameLogic {
   def move(game: Game, player: Player, dir: String): (Game, Coord, Boolean) = {
     val (room, roomIdx) = game.map.rooms.zipWithIndex.find(_._1.players.contains(player.id)).get
     val newCoord = dir match {
-      case "N" => room.location.copy(_1 = (room.location._1 - 1 + 5) % 5)
-      case "S" => room.location.copy(_1 = (room.location._1 + 1) % 5)
-      case "W" => room.location.copy(_2 = (room.location._2 - 1 + 5) % 5)
-      case "E" => room.location.copy(_2 = (room.location._2 + 1) % 5)
+      case "N" => room.location.copy(_1 = (room.location._1 - 1 + MAP_SIZE) % MAP_SIZE)
+      case "S" => room.location.copy(_1 = (room.location._1 + 1) % MAP_SIZE)
+      case "W" => room.location.copy(_2 = (room.location._2 - 1 + MAP_SIZE) % MAP_SIZE)
+      case "E" => room.location.copy(_2 = (room.location._2 + 1) % MAP_SIZE)
     }
     val (destRoom, destRoomIdx) = game.map.rooms.zipWithIndex.find(_._1.location == newCoord).get
     game.map.rooms(roomIdx) = room.copy(players = room.players.filterNot(_ == player.id))
@@ -381,11 +391,13 @@ object GameLogic {
 
     val actionsA = a.actions
     val actionsB = b.actions
+    var gameList: List[Tuple4[Coord, Coord, Coord, Coord]] = List()
     for ((actA, actB) <- actionsA.zip(actionsB)) {
       var aDead = false
       var bDead = false
       var newPosA = currentA
       var newPosB = currentB
+      gameList = gameList ++ List(Tuple4(currentA, dirA, currentB, dirB))
 
       def hasShield(act: PlayerAction) = act match {
         case UsePA(objId2) => objects(objId2)._type == Shield
@@ -484,16 +496,16 @@ object GameLogic {
       if (aDead || bDead)
         return (false, "", startA, startB,
           if (aDead && bDead)
-            Outcome(List(), List(a.player, b.player))
+            Outcome(List(), List(a.player, b.player), gameList)
           else if (aDead)
-            Outcome(List(b.player), List(a.player))
+            Outcome(List(b.player), List(a.player), gameList)
           else
-            Outcome(List(a.player), List(b.player)))
+            Outcome(List(a.player), List(b.player), gameList))
       currentA = newPosA
       currentB = newPosB
     }
 
-    (false, "", startA, startB, Outcome(List(a.player, b.player), List()))
+    (false, "", startA, startB, Outcome(List(a.player, b.player), List(), gameList))
   }
 }
 
@@ -540,10 +552,10 @@ object GameUtils {
           playersInRoom.put(player)
         }
         val objectsInRoom = new JSONArray()
-        for (obj <- room.objects) {
+        for (objId <- room.objects) {
           val objObj = new JSONObject()
-          objObj.put("id", obj)
-          objObj.put("type", game.objects(obj)._type.name)
+          objObj.put("id", objId)
+          objObj.put("type", game.objects(objId)._type.name)
           objectsInRoom.put(objObj)
         }
         roomObj.put("players", playersInRoom)

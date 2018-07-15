@@ -56,7 +56,8 @@ class GameServlet extends ScalatraServlet {
     }
   }
 
-  def withPlayer(func: (Game, Player, String) => Any)(game: Game): Any = { game: Game =>
+  def withPlayer(game: Game)(func: (Game, Player, String) => Any): Any = {
+    val requestStr = request.body
     val result = new JSONObject()
     result.put("status", 400)
     if (!params.contains("player")) {
@@ -71,6 +72,9 @@ class GameServlet extends ScalatraServlet {
       } else if (playerIdStr.matches("[^0-9]")) {
         result.put("msg", "player must be a number")
         result.toString
+      } else if (requestStr.isEmpty()) {
+        result.put("msg", "must provide a password in the post body")
+        result.toString
       } else {
         val playerId = playerIdStr.toInt
         val stats = game.stats(playerId)
@@ -79,7 +83,6 @@ class GameServlet extends ScalatraServlet {
           result.toString
         } else {
           val player = game.players(playerId)
-          val requestStr = request.body
           val firstLineAndRest = requestStr.split("\n", 2)
           val providedkey = firstLineAndRest(0)
           if (!providedkey.equals(player.pass)) {
@@ -91,7 +94,7 @@ class GameServlet extends ScalatraServlet {
               result.put("msg", "dead players tell no lies")
               result.toString
             } else {
-              func(game, player, firstLineAndRest(1))
+              func(game, player, if (firstLineAndRest.length == 1) "" else firstLineAndRest(1))
             }
           }
         }
@@ -126,137 +129,148 @@ class GameServlet extends ScalatraServlet {
     result.toString
   })
 
-  post("/api/move/:game/:player/:direction")(withGame(withPlayer { (game, player, body) =>
-    val result = new JSONObject()
-    result.put("status", 400)
+  post("/api/move/:game/:player/:direction")(withGame { game =>
+    withPlayer(game) { (game, player, body) =>
+      val result = new JSONObject()
+      result.put("status", 400)
 
-    if (!params.contains("direction")) {
-      result.put("msg", "must specify a direction (N,S,E,W)")
-      result.toString
-    } else {
-      val dir = params("direction")
-      if (dir.isEmpty()) {
+      if (!params.contains("direction")) {
         result.put("msg", "must specify a direction (N,S,E,W)")
         result.toString
-      } else if (!Set("N", "S", "E", "W").contains(dir)) {
-        result.put("msg", "direction must be one of {N,S,E,W}")
-        result.toString
       } else {
-        val (newGame, newCoord, killed) = GameLogic.move(game, player, dir)
-        games += (game.id -> newGame)
-        result.put("status", 200)
-        if (killed) {
-          result.put("msg", "killed")
-        } else {
-          result.put("msg", s"new location: $newCoord")
-        }
-      }
-    }
-  }))
-
-  post("/api/pick/:game/:player/:id")(withGame(withPlayer { (game, player, body) =>
-    val result = new JSONObject()
-    result.put("status", 400)
-
-    if (!params.contains("id")) {
-      result.put("msg", "must specify an object")
-      result.toString
-    } else {
-      val objectIdStr = params("id")
-      if (objectIdStr.isEmpty()) {
-        result.put("msg", "must specify an object")
-        result.toString
-      } else if (objectIdStr.matches("[^0-9]")) {
-        result.put("msg", "object must be a number")
-        result.toString
-      } else {
-        val objectId = objectIdStr.toInt
-        if (!game.objects.contains(objectId)) {
-          result.put("msg", "unknown object")
+        val dir = params("direction")
+        if (dir.isEmpty()) {
+          result.put("msg", "must specify a direction (N,S,E,W)")
+          result.toString
+        } else if (!Set("N", "S", "E", "W").contains(dir)) {
+          result.put("msg", "direction must be one of {N,S,E,W}")
           result.toString
         } else {
-          val (newGame, found) = GameLogic.picked(game, player, objectId)
-          if (!found) {
-            result.put("msg", "object is not there")
-            result.toString
+          val (newGame, newCoord, killed) = GameLogic.move(game, player, dir)
+          games += (game.id -> newGame)
+          result.put("status", 200)
+          if (killed) {
+            result.put("msg", "killed")
           } else {
-            games += (game.id -> newGame)
-            result.put("status", 200)
-            result.put("msg", "picked")
-            result.toString
+            result.put("msg", s"new location: $newCoord")
           }
         }
       }
     }
-  }))
+  })
 
-  def withOtherPlayer(func: (Game, Player, Player, String) => Any)(game: Game, player: Player, body: String): Any = {
-    (game: Game, player: Player, body: String) =>
+  post("/api/pick/:game/:player/:id")(withGame { game =>
+    withPlayer(game) { (game, player, body) =>
       val result = new JSONObject()
       result.put("status", 400)
 
-      if (!params.contains("other")) {
-        result.put("msg", "must specify another player")
+      if (!params.contains("id")) {
+        result.put("msg", "must specify an object")
         result.toString
       } else {
-        val otherIdStr = params("other")
-        if (otherIdStr.isEmpty()) {
-          result.put("status", 400)
-          result.put("msg", "must specify another player")
+        val objectIdStr = params("id")
+        if (objectIdStr.isEmpty()) {
+          result.put("msg", "must specify an object")
           result.toString
-        } else if (otherIdStr.matches("[^0-9]")) {
-          result.put("msg", "the other player must be a number")
+        } else if (objectIdStr.matches("[^0-9]")) {
+          result.put("msg", "object must be a number")
           result.toString
         } else {
-          val otherId = otherIdStr.toInt
-          val stats = game.stats(otherId)
-          if (!game.players.contains(otherId)) {
-            result.put("msg", "unknown other player")
+          val objectId = objectIdStr.toInt
+          if (!game.objects.contains(objectId)) {
+            result.put("msg", "unknown object")
             result.toString
           } else {
-            val other = game.players(otherId)
-            val stats = game.stats(otherId)
-            if (!stats.alive) {
-              result.put("msg", "it's dead Jim, it's dead")
+            val (newGame, found) = GameLogic.picked(game, player, objectId)
+            if (!found) {
+              result.put("msg", "object is not there")
               result.toString
             } else {
-              func(game, player, other, body)
+              games += (game.id -> newGame)
+              result.put("status", 200)
+              result.put("msg", "picked")
+              result.toString
             }
           }
         }
       }
-  }
+    }
+  })
 
-  post("/api/attack/:game/:player/start/:other")(withGame(withPlayer(withOtherPlayer { (game, player, other, body) =>
+  def withOtherPlayer(game: Game, player: Player, body: String)(func: (Game, Player, Player, String) => Any): Any = {
     val result = new JSONObject()
+    result.put("status", 400)
 
-    val actionsHash = body
-    val (newGame, notThere) = GameLogic.startAttack(game, player, other, actionsHash)
-    if (notThere) {
-      result.put("status", 400)
-      result.put("msg", "the other player is not there")
+    if (!params.contains("other")) {
+      result.put("msg", "must specify another player")
+      result.toString
     } else {
-      games += (game.id -> newGame)
-      result.put("status", 200)
-      result.put("msg", "attack request noted")
-    }
-    result.toString
-  })))
-
-  post("/api/attack/:game/:player/execute/:other")(withGame(withPlayer(withOtherPlayer { (game, player, other, body) =>
-    val result = new JSONObject()
-    val actionsJson = body
-    val (newGame, inError, outcome, msg) = GameLogic.attack(game, player, other, actionsJson)
-    games += (game.id -> newGame)
-    result.put("status", if (inError) 400 else 200)
-    result.put("msg", msg)
-    result.toString
-  })))
-
-  get("/api/state/:game") {
-    games.synchronized {
-      val game = games(params("game").toInt)
-      GameUtils.toJson(game)
+      val otherIdStr = params("other")
+      if (otherIdStr.isEmpty()) {
+        result.put("status", 400)
+        result.put("msg", "must specify another player")
+        result.toString
+      } else if (otherIdStr.matches("[^0-9]")) {
+        result.put("msg", "the other player must be a number")
+        result.toString
+      } else {
+        val otherId = otherIdStr.toInt
+        val stats = game.stats(otherId)
+        if (!game.players.contains(otherId)) {
+          result.put("msg", "unknown other player")
+          result.toString
+        } else {
+          val other = game.players(otherId)
+          val stats = game.stats(otherId)
+          if (!stats.alive) {
+            result.put("msg", "it's dead Jim, it's dead")
+            result.toString
+          } else {
+            func(game, player, other, body)
+          }
+        }
+      }
     }
   }
+
+  post("/api/attack/:game/:player/start/:other")(withGame { game =>
+    withPlayer(game) { (game, player, body) =>
+      withOtherPlayer(game, player, body) { (game, player, other, body) =>
+        val result = new JSONObject()
+
+        val actionsHash = body
+        val (newGame, notThere) = GameLogic.startAttack(game, player, other, actionsHash)
+        if (notThere) {
+          result.put("status", 400)
+          result.put("msg", "the other player is not there")
+        } else {
+          games += (game.id -> newGame)
+          result.put("status", 200)
+          result.put("msg", "attack request noted")
+        }
+        result.toString
+      }
+    }
+  })
+
+  post("/api/attack/:game/:player/execute/:other")(withGame { game =>
+    withPlayer(game) { (game, player, body) =>
+      withOtherPlayer(game, player, body) { (game, player, other, body) =>
+        val result = new JSONObject()
+        val actionsJson = body
+        val (newGame, inError, outcome, msg) = GameLogic.attack(game, player, other, actionsJson)
+        games += (game.id -> newGame)
+        result.put("status", if (inError) 400 else 200)
+        result.put("msg", msg)
+        if (outcome.isDefined)
+          result.put("outcome", outcome.get.toJsonObject())
+        result.toString
+      }
+    }
+  })
+
+  get("/api/state/:game")(withGame { game =>
+    //System.out.println(game); game.map.rooms.foreach(r => System.out.println(r))
+    GameUtils.toJson(game)
+  })
 }
