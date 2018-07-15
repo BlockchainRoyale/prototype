@@ -22,11 +22,26 @@ body {
     margin-right: auto;
 }
 
+#middle-column {
+    display: flex;
+    flex-direction: column;
+}
+
 #players-column {
     display: flex;
     flex-direction: column;
     justify-items: center;
     text-align: center;
+}
+#listOfPlayers {
+    list-style-type: none;
+}
+
+#listOfPlayers button {
+    width: 100%;
+    height: 50px;
+    font-family: inherit;
+    font-size: 16pt;
 }
 
 #arena {
@@ -91,7 +106,6 @@ body {
     margin: 20px 20px 0 20px;
     padding: 0 20px 20px 20px;
     border: solid black 1px;
-    background-color: green;
 }
 
 #playerCards {
@@ -103,15 +117,19 @@ body {
 
 #menu {
     border: 1px solid black;
-    background-color: pink;
 }
 
 #movement {
     margin-top: 10%;
+    margin-left: auto;
+    margin-right: auto;
     border: 1px solid black;
     padding: 10px;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
+    width: 140px;
+    height: 90px;
+
 }
 
 #up {
@@ -120,14 +138,7 @@ body {
 }
 
 #right {
-    grid-column-start: 3;
     border-radius: 0 5px 5px 0;
-}
-
-#down {
-    grid-row-start: 3;
-    grid-column-start: 2;
-    border-radius: 0 0 5px 5px;
 }
 
 #left{
