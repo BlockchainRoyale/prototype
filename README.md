@@ -1,6 +1,12 @@
 # non-blockchain prototype
 
+To build, you need [maven](https://maven.apache.org/):
+
+```sh
 mvn package appassembler:assemble
+```
+
+Then interact with the API (see servlet.scala for all the paths available) to create a game:
 
 ```sh
 curl -Xpost http://localhost:8822/api/new_game
