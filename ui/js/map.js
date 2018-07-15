@@ -19,13 +19,15 @@ var playerLocations = [
     [0, 2, 0],
     [0, 3, 0],
     [0, 4, 0],
-    [1, 5, 0],
-    [1, 6, 0],
+    [0, 5, 0],
+    [0, 6, 0],
     [1, 0, 0],
     [1, 1, 0],
     [1, 2, 3],
     [1, 3, 0],
     [1, 4, 0],
+    [1, 5, 4],
+    [1, 6, 0],
     [2, 0, 3],
     [2, 1, 0],
     [2, 2, 0],
@@ -84,7 +86,7 @@ angryPeople.push([]);
 
 angryPeople[0] = ["asdf", 1, 2, "fakeaddress1"];
 angryPeople[1] = ["asdd", 1, 2, "fakeaddress2"];
-angryPeople[2] = ["asdf", 1, 3, "fakeaddress3"];
+angryPeople[2] = ["asdf", 3, 2, "fakeaddress3"];
 
 const colors = ['red', 'purple', 'indigo', 'blue', 'green', 'yellow', 'orange', 'brown', 'light blue'];
 
@@ -98,23 +100,39 @@ const AICONSIZE = ASIZE / 3;
 
 initialize();
 
+function findLocation() {
+    var out = yourLocation[0] * 7 + yourLocation[1];
+}
+
 function moveUp(){
+    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
     yourLocation[1]--;
+    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
+    battleRequests();
     mapRedraw();
 }
 
 function moveRight(){
+    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
     yourLocation[0]++
+    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
+    battleRequests();
     mapRedraw();
 }
 
 function moveDown(){
+    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
     yourLocation[1]++;
+    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
+    battleRequests();
     mapRedraw();
 }
 
 function moveLeft(){
-    yourLocation[0]--;
+    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
+    yourLocation[0]--
+    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
+    battleRequests();
     mapRedraw();
 }
 
@@ -191,6 +209,13 @@ function drawPlayerLocations() {
         }
 
     }
+}
+
+function submitInputs(){
+    var textArea = document.getElementById("inputTextArea");
+    var stuff = textArea.value;
+    textArea.value = '';
+
 }
 
 function playerInfoSetup() {
