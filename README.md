@@ -15,15 +15,15 @@ curl -Xpost http://localhost:8822/api/new_game
 will return id, for example "1"
 
 ```sh
-curl -Xpost http://localhost:8822/api/add_player/1/named/pablo
+curl -Xpost -H "Content-type: text/plain" --data pass http://localhost:8822/api/add_player/1/named/pablo
 ```
 
 will return the id and true or false depending whether the game has started
 
 ```sh
-curl -Xpost http://localhost:8822/api/add_player/1/named/player2
-curl -Xpost http://localhost:8822/api/add_player/1/named/player3
-curl -Xpost http://localhost:8822/api/add_player/1/named/player4
+curl -Xpost -H "Content-type: text/plain" --data pass2 http://localhost:8822/api/add_player/1/named/player2
+curl -Xpost -H "Content-type: text/plain" --data pass3 http://localhost:8822/api/add_player/1/named/player3
+curl -Xpost -H "Content-type: text/plain" --data pass4 http://localhost:8822/api/add_player/1/named/player4
 ```
 
 more players till it starts

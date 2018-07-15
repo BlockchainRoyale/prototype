@@ -1,6 +1,11 @@
 package io.github.blockchain_royale.prototype
 
 import scala.util.Random
+import org.json.JSONArray
+import org.json.JSONML
+import org.json.JSONTokener
+import org.json.JSONObject
+import org.apache.commons.codec.digest.DigestUtils
 
 sealed abstract class ObjectType {
   val name: String
@@ -28,20 +33,15 @@ object Types {
 object Consts {
   val ALL_OBJECTS = List(Gun, Grenade, Shield).toArray
   val NUM_PLAYERS = 4
-  val MAP_SIZE = 5
+  val MAP_SIZE = 7
   val TOTAL_OBJECTS = 9
   val ARENA_SIZE = 5
 }
 
 import Types._
 import Consts._
-import org.json.JSONArray
-import org.json.JSONML
-import org.json.JSONTokener
-import org.json.JSONObject
-import org.apache.commons.codec.digest.DigestUtils
 
-case class Player(id: PlayerId, name: String)
+case class Player(id: PlayerId, name: String, pass: String)
 case class Object(id: ObjectId, _type: ObjectType)
 case class Room(location: Coord, objects: List[ObjectId], players: List[PlayerId], open: Boolean)
 case class Stats(alive: Boolean, kills: List[PlayerId])
@@ -195,7 +195,152 @@ object GameLogic {
       stats = game.players.mapValues(v => Stats(true, List())))
   }
 
-  def combat(a: PlayerFinishAttackGA, b: PlayerFinishAttackGA, objects: Map[ObjectId, Object]): Tuple3[Coord, Coord, Outcome] = {
+  def newPlayer(game: Game, name: String, pass: String): (Game, PlayerId, Boolean) = {
+    val newPlayer = Player(game.players.size + 1, name, pass)
+    val newGame = game.copy(players = game.players + (newPlayer.id -> newPlayer))
+
+    val (potentiallyStartedGame, started) =
+      if (newGame.players.size == NUM_PLAYERS)
+        (GameLogic.startGame(newGame), true)
+      else
+        (newGame, false)
+    (potentiallyStartedGame.copy(chain = NewPlayerGA(newPlayer.id, newPlayer.name) :: potentiallyStartedGame.chain), newPlayer.id, started)
+  }
+
+  def move(game: Game, player: Player, dir: String): (Game, Coord, Boolean) = {
+    val (room, roomIdx) = game.map.rooms.zipWithIndex.find(_._1.players.contains(player.id)).get
+    val newCoord = dir match {
+      case "N" => room.location.copy(_1 = (room.location._1 - 1 + 5) % 5)
+      case "S" => room.location.copy(_1 = (room.location._1 + 1) % 5)
+      case "W" => room.location.copy(_2 = (room.location._2 - 1 + 5) % 5)
+      case "E" => room.location.copy(_2 = (room.location._2 + 1) % 5)
+    }
+    val (destRoom, destRoomIdx) = game.map.rooms.zipWithIndex.find(_._1.location == newCoord).get
+    game.map.rooms(roomIdx) = room.copy(players = room.players.filterNot(_ == player.id))
+    game.map.rooms(destRoomIdx) = destRoom.copy(players = destRoom.players ++ List(player.id))
+
+    val (potentiallyKilledPlayer, killed) = if (!destRoom.open)
+      (game.copy(stats = game.stats + (player.id -> (game.stats(player.id).copy(alive = false)))), true)
+    else (game, false)
+
+    (potentiallyKilledPlayer.copy(chain = PlayerMoveGA(player.id, dir) :: game.chain), newCoord, killed)
+  }
+
+  def picked(game: Game, player: Player, objectId: ObjectId): (Game, Boolean) = {
+    val (room, roomIdx) = game.map.rooms.zipWithIndex.find(_._1.players.contains(player.id)).get
+    if (room.objects.contains(objectId)) {
+      game.map.rooms(roomIdx) = room.copy(objects = room.objects.filter(_ != objectId))
+      (game.copy(
+        holding = game.holding + (player.id -> (game.holding(player.id) ++ List(objectId))),
+        chain = PlayerPickGA(player.id, objectId) :: game.chain), true)
+    } else (game, false)
+  }
+
+  def startAttack(game: Game, player: Player, other: Player, actionsHash: String): (Game, Boolean) = {
+    val (roomOwn, roomOwnIdx) = game.map.rooms.zipWithIndex.find(_._1.players.contains(player.id)).get
+    val (roomOther, roomOtherIdx) = game.map.rooms.zipWithIndex.find(_._1.players.contains(other.id)).get
+    if (roomOwnIdx != roomOtherIdx) {
+      (game, true)
+    } else
+      (game.copy(chain = PlayerStartAttackGA(player.id, other.id, actionsHash) :: game.chain), false)
+  }
+  def attack(game: Game, player: Player, other: Player, actionsStr: String): (Game, Boolean, Option[Outcome], String) = {
+    if (actionsStr.length() > 512)
+      return (game, true, None, "action string too long (don't cheat!)")
+
+    val (roomOwn, roomOwnIdx) = game.map.rooms.zipWithIndex.find(_._1.players.contains(player.id)).get
+    val (roomOther, roomOtherIdx) = game.map.rooms.zipWithIndex.find(_._1.players.contains(other.id)).get
+    if (roomOwnIdx != roomOtherIdx)
+      return (game, true, None, "player is not there")
+
+    // player started?
+    val startOwn = game.chain.find(act => act match {
+      case PlayerStartAttackGA(p, o, _) => p == player.id && o == other.id
+      case _                            => false
+    }).map(_.asInstanceOf[PlayerStartAttackGA])
+
+    // other started?
+    val startOther = game.chain.find(act => act match {
+      case PlayerStartAttackGA(p, o, _) => o == player.id && p == other.id
+      case _                            => false
+    }).map(_.asInstanceOf[PlayerStartAttackGA])
+
+    // other attacked?
+    val otherAttack = game.chain.find(act => act match {
+      case PlayerFinishAttackGA(p, o, _) => o == player.id && p == other.id
+      case _                             => false
+    }).map(_.asInstanceOf[PlayerFinishAttackGA])
+
+    if (!startOwn.isDefined && !startOther.isDefined)
+      return (game, true, None, "an attack was never started")
+
+    val ownAttack = PlayerFinishAttackGA(player.id, other.id, actionsStr)
+    val gameChained = game.copy(chain = ownAttack :: game.chain)
+    if (startOwn.isDefined && startOther.isDefined) {
+      if (startOwn.get.timestamp < startOther.get.timestamp) {
+        // other remains
+        return (gameChained, false, None, "waiting for actions from initiating player")
+      } else {
+        // mine remains
+        if (otherAttack.isDefined && otherAttack.get.timestamp > startOwn.get.timestamp) {
+          // it's on! check hashes
+          if (!(startOwn.get.actionsHash.equals(GameUtils.hash(actionsStr))))
+            return (game, true, None, "hashes do not match! cheater!")
+
+        } else return (game, true, None, "don't disclose your moves yet!")
+      }
+    } else if (startOwn.isDefined) {
+      if (otherAttack.isDefined && otherAttack.get.timestamp > startOwn.get.timestamp) {
+        // it's on! check hashes
+        if (!(startOwn.get.actionsHash.equals(GameUtils.hash(actionsStr))))
+          return (game, true, None, "hashes do not match! cheater!")
+      } else return (game, true, None, "don't disclose your moves yet!")
+    } else // other is defined
+      return (gameChained, false, None, "waiting for actions from initiating player")
+
+    // now fight
+    val (inError, msg, startA, startB, outcome) = GameLogic.combat(game, ownAttack, otherAttack.get, game.objects)
+    if (inError)
+      return (game, true, None, msg)
+
+    val combatChained = gameChained.copy(
+      chain = CombatGA(player.id, other.id, startA, startB, actionsStr, otherAttack.get.actionsString, outcome) :: gameChained.chain)
+
+    if (outcome.dead.size > 0) {
+      // process deaths
+      var result: (Game, Boolean, Option[Outcome], String) = null
+      if (outcome.dead.size == 1) {
+        val deadId = outcome.dead(0)
+        val aliveId = outcome.alive(0)
+        val oneDead = combatChained.copy(
+          stats = combatChained.stats +
+            (deadId -> combatChained.stats(player.id).copy(alive = false)) +
+            (aliveId -> (combatChained.stats(other.id).copy(
+              kills = deadId :: combatChained.stats(other.id).kills))),
+          holding = combatChained.holding + (aliveId -> (combatChained.holding(aliveId) ++ combatChained.holding(deadId))) + (deadId -> List()))
+
+        result = (oneDead, false, Some(outcome), game.players(deadId).name + "died")
+      } else { // both died
+        val bothDied = combatChained.copy(
+          stats = combatChained.stats +
+            (player.id -> (combatChained.stats(player.id).copy(alive = false,
+              kills = other.id :: combatChained.stats(player.id).kills))) +
+              (other.id -> (combatChained.stats(other.id).copy(alive = false,
+                kills = player.id :: combatChained.stats(other.id).kills))),
+          holding = combatChained.holding + (player.id -> List()) + (other.id -> List()))
+        val room = bothDied.map.rooms(roomOwnIdx)
+        bothDied.map.rooms(roomOwnIdx) = room.copy(objects = room.objects ++ combatChained.holding(player.id) ++ combatChained.holding(other.id))
+        result = (bothDied, false, Some(outcome), "200 both died")
+      }
+
+      //TODO shrink map
+      return if (result._1.stats.values.filter(_.alive).size <= 1) result.copy(_4 = "game finished") else result
+    } else return (combatChained, false, Some(outcome), "nobody died")
+  }
+
+  def combat(game: Game, a: PlayerFinishAttackGA, b: PlayerFinishAttackGA, objects: Map[ObjectId, Object]): (Boolean, String, Coord, Coord, Outcome) = {
+    //TODO validate the weapons used belong to the players
+
     val hashed = GameUtils.hash(a.actionsString + b.actionsString)
     val startAopt = (hashed(0).toInt % MAP_SIZE, hashed(1).toInt % MAP_SIZE)
     val startB = (hashed(2).toInt % MAP_SIZE, hashed(3).toInt % MAP_SIZE)
@@ -337,7 +482,7 @@ object GameLogic {
         case UsePA(obj) => // noop
       }
       if (aDead || bDead)
-        return (startA, startB,
+        return (false, "", startA, startB,
           if (aDead && bDead)
             Outcome(List(), List(a.player, b.player))
           else if (aDead)
@@ -348,7 +493,7 @@ object GameLogic {
       currentB = newPosB
     }
 
-    (startA, startB, Outcome(List(a.player, b.player), List()))
+    (false, "", startA, startB, Outcome(List(a.player, b.player), List()))
   }
 }
 
@@ -370,7 +515,10 @@ object GameUtils {
       playerObj.put("kills", killsArray)
       val holdArray = new JSONArray()
       for (holdId <- game.holding(player.id)) {
-        holdArray.put(game.objects(holdId)._type.name)
+        val objObj = new JSONObject()
+        objObj.put("id", holdId)
+        objObj.put("type", game.objects(holdId)._type.name)
+        holdArray.put(objObj)
       }
       playerObj.put("holds", holdArray)
 
