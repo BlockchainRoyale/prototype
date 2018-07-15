@@ -238,7 +238,7 @@ class GameServlet extends ScalatraServlet {
       withOtherPlayer(game, player, body) { (game, player, other, body) =>
         val result = new JSONObject()
 
-        val actionsHash = body
+        val actionsHash = body.trim
         val (newGame, notThere) = GameLogic.startAttack(game, player, other, actionsHash)
         if (notThere) {
           result.put("status", 400)

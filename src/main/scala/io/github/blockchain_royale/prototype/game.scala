@@ -125,7 +125,7 @@ case class PlayerFinishAttackGA(player: PlayerId, other: PlayerId, actionsString
           case "MoveBackward"      => MoveBackwardPA()
           case "TurnLeft"          => TurnLeftPA()
           case "TurnRight"         => TurnRightPA()
-          case "UsePA"             => UsePA(obj.getInt("object"))
+          case "Use"               => UsePA(obj.getInt("object"))
         }
       }).toList
     }
@@ -154,7 +154,7 @@ case class Game(id: GameId,
                 chain: List[GameAction])
 
 object GameLogic {
-  
+
   val random: Random = new Random(42)
 
   def newGame(id: Int): Game = Game(id, map = GameMap(Array()), chain = List(GenesisGA()))

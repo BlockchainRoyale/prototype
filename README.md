@@ -314,3 +314,54 @@ game state looks like this:
 }
 ```
 
+## Sample actions
+
+```sh
+curl -Xpost http://localhost:8822/api/new_game
+curl -Xpost  -H "Content-type: text/plain" --data pass1 http://localhost:8822/api/add_player/1/named/player1
+curl -Xpost  -H "Content-type: text/plain" --data pass2 http://localhost:8822/api/add_player/1/named/player2
+curl -Xpost  -H "Content-type: text/plain" --data pass3 http://localhost:8822/api/add_player/1/named/player3
+curl -Xpost  -H "Content-type: text/plain" --data pass4 http://localhost:8822/api/add_player/1/named/player4
+curl -Xpost  -H "Content-type: text/plain" --data pass2 http://localhost:8822/api/move/1/2/W
+curl -Xpost  -H "Content-type: text/plain" --data pass2 http://localhost:8822/api/move/1/2/S
+curl -Xpost  -H "Content-type: text/plain" --data-binary @start_attack.txt http://localhost:8822/api/attack/1/2/start/3
+curl -Xpost  -H "Content-type: text/plain" --data-binary @respond_attack.txt http://localhost:8822/api/attack/1/3/execute/2
+curl -Xpost  -H "Content-type: text/plain" --data-binary @execute_attack.txt http://localhost:8822/api/attack/1/2/execute/3
+```
+
+with start_attack.txt as
+
+```txt
+pass2
+a8e36d3705a1ad54e7720760fa94bbad01781913
+```
+
+respond_attack.txt
+
+```txt
+pass3
+[{"type":"Use","object":2},
+{"type":"MoveNorth"},
+{"type":"Use","object":2},
+{"type":"MoveNorth"},
+{"type":"Use","object":2},
+{"type":"MoveNorth"},
+{"type":"Use","object":2},
+{"type":"MoveNorth"}
+]
+```
+
+```txt
+pass2
+[{"type":"Use","object":1},
+{"type":"MoveNorth"},
+{"type":"Use","object":1},
+{"type":"MoveNorth"},
+{"type":"Use","object":1},
+{"type":"MoveNorth"},
+{"type":"Use","object":1},
+{"type":"MoveNorth"}
+]
+```
+
+
