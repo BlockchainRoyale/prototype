@@ -65,13 +65,35 @@ case class Outcome(alive: List[PlayerId], dead: List[PlayerId])
 sealed abstract class GameAction {
   val timestamp = System.currentTimeMillis()
   val player: PlayerId
+  def toJsonObject(): JSONObject = {
+    val obj = new JSONObject()
+    obj.put("type", this.getClass.getSimpleName)
+    obj.put("timestamp", timestamp)
+    extra(obj)
+    obj
+  }
+  def extra(obj: JSONObject): Unit
+  def toJson(): String = toJsonObject().toString
 }
-case class GenesisAct() extends GameAction { val player = -1 }
-case class NewPlayerAct(player: PlayerId, name: String) extends GameAction
-case class PlayerMoveAct(player: PlayerId, dir: String) extends GameAction
-case class PlayerPickAct(player: PlayerId, obj: ObjectId) extends GameAction
-case class PlayerStartAttackAct(player: PlayerId, other: PlayerId, actionsHash: String) extends GameAction
-case class PlayerFinishAttackAct(player: PlayerId, other: PlayerId, actionsString: String) extends GameAction {
+case class GenesisGA() extends GameAction {
+  val player = -1
+  def extra(obj: JSONObject) = {}
+}
+case class NewPlayerGA(player: PlayerId, name: String) extends GameAction {
+  def extra(obj: JSONObject) = { obj.put("player", player); obj.put("name", name) }
+}
+case class PlayerMoveGA(player: PlayerId, dir: String) extends GameAction {
+  def extra(obj: JSONObject) = { obj.put("player", player); obj.put("dir", dir) }
+}
+case class PlayerPickGA(player: PlayerId, obj: ObjectId) extends GameAction {
+  def extra(obj: JSONObject) = { obj.put("player", player); obj.put("obj", obj) }
+}
+case class PlayerStartAttackGA(player: PlayerId, other: PlayerId, actionsHash: String) extends GameAction {
+  def extra(obj: JSONObject) = { obj.put("player", player); obj.put("other", other); obj.put("hash", actionsHash); }
+}
+case class PlayerFinishAttackGA(player: PlayerId, other: PlayerId, actionsString: String) extends GameAction {
+  def extra(obj: JSONObject) = { obj.put("player", player); obj.put("other", other); obj.put("actions", actionsString); }
+
   private var cache: List[PlayerAction] = null
   def actions: List[PlayerAction] = {
     if (cache == null) {
@@ -100,8 +122,17 @@ case class PlayerFinishAttackAct(player: PlayerId, other: PlayerId, actionsStrin
     cache
   }
 }
-case class CombatAct(a: PlayerId, b: PlayerId, startA: Coord, startB: Coord, actionsA: String, actionsB: String, outcome: Outcome) extends GameAction {
+case class CombatGA(a: PlayerId, b: PlayerId, startA: Coord, startB: Coord, actionsA: String, actionsB: String, outcome: Outcome) extends GameAction {
   val player = -1
+  def extra(obj: JSONObject) = {
+    obj.put("playerA", a)
+    obj.put("playeB", b)
+    obj.put("startA_row", startA._1)
+    obj.put("startA_col", startA._2)
+    obj.put("startB_row", startB._1)
+    obj.put("startB_col", startB._2)
+    obj.put("outcome", outcome)
+  }
 }
 
 case class Game(id: GameId,
@@ -112,7 +143,9 @@ case class Game(id: GameId,
                 map: GameMap,
                 chain: List[GameAction])
 
-object GameUtils {
+object GameLogic {
+
+  def newGame(id: Int): Game = Game(id, map = GameMap(Array()), chain = List(GenesisGA()))
 
   def startGame(game: Game): Game = {
     var objectCount = 0
@@ -162,77 +195,7 @@ object GameUtils {
       stats = game.players.mapValues(v => Stats(true, List())))
   }
 
-  def toJson(game: Game) = {
-    val obj = new JSONObject()
-    var players: Map[PlayerId, JSONObject] = Map()
-    for (player <- game.players.values) {
-      val playerObj = new JSONObject()
-      val stats = game.stats(player.id)
-      playerObj.put("id", player.id)
-      playerObj.put("name", player.name)
-      playerObj.put("alive", stats.alive)
-      val killsArray = new JSONArray()
-      for (killed <- stats.kills) {
-        killsArray.put(killed)
-      }
-      playerObj.put("kills", killsArray)
-      val holdArray = new JSONArray()
-      for (holdId <- game.holding(player.id)) {
-        holdArray.put(game.objects(holdId)._type.name)
-      }
-      playerObj.put("holds", holdArray)
-
-      players += player.id -> playerObj
-    }
-
-    val rows = new JSONArray()
-    for (r <- 0.to(4)) {
-      val row = new JSONArray()
-      for (c <- 0.to(4)) {
-        val roomObj = new JSONObject()
-        roomObj.put("row", r)
-        roomObj.put("col", c)
-        val playersInRoom = new JSONArray()
-        val room = game.map.rooms.find(_.location == Tuple2(r, c)).get
-        for (player <- room.players) {
-          players(player).put("row", r)
-          players(player).put("col", c)
-          playersInRoom.put(player)
-        }
-        val objectsInRoom = new JSONArray()
-        for (obj <- room.objects) {
-          val objObj = new JSONObject()
-          objObj.put("id", obj)
-          objObj.put("type", game.objects(obj)._type.name)
-          objectsInRoom.put(objObj)
-        }
-        roomObj.put("players", playersInRoom)
-        roomObj.put("objects", objectsInRoom)
-        roomObj.put("active", room.open)
-        row.put(roomObj)
-      }
-      rows.put(row)
-    }
-
-    val playerArray = new JSONArray()
-    for (playerObj <- players.values) {
-      playerArray.put(playerObj)
-    }
-
-    val actionArray = new JSONArray()
-    for (act <- game.chain) {
-      actionArray.put(act.toString)
-    }
-    obj.put("players", playerArray)
-    obj.put("rooms", rows)
-    obj.put("actions", actionArray)
-
-    obj.toString
-  }
-
-  def hash(str: String): String = DigestUtils.sha1Hex(str)
-
-  def combat(a: PlayerFinishAttackAct, b: PlayerFinishAttackAct, objects: Map[ObjectId, Object]): Tuple3[Coord, Coord, Outcome] = {
+  def combat(a: PlayerFinishAttackGA, b: PlayerFinishAttackGA, objects: Map[ObjectId, Object]): Tuple3[Coord, Coord, Outcome] = {
     val hashed = GameUtils.hash(a.actionsString + b.actionsString)
     val startAopt = (hashed(0).toInt % MAP_SIZE, hashed(1).toInt % MAP_SIZE)
     val startB = (hashed(2).toInt % MAP_SIZE, hashed(3).toInt % MAP_SIZE)
@@ -387,4 +350,77 @@ object GameUtils {
 
     (startA, startB, Outcome(List(a.player, b.player), List()))
   }
+}
+
+object GameUtils {
+
+  def toJson(game: Game) = {
+    val obj = new JSONObject()
+    var players: Map[PlayerId, JSONObject] = Map()
+    for (player <- game.players.values) {
+      val playerObj = new JSONObject()
+      val stats = game.stats(player.id)
+      playerObj.put("id", player.id)
+      playerObj.put("name", player.name)
+      playerObj.put("alive", stats.alive)
+      val killsArray = new JSONArray()
+      for (killed <- stats.kills) {
+        killsArray.put(killed)
+      }
+      playerObj.put("kills", killsArray)
+      val holdArray = new JSONArray()
+      for (holdId <- game.holding(player.id)) {
+        holdArray.put(game.objects(holdId)._type.name)
+      }
+      playerObj.put("holds", holdArray)
+
+      players += player.id -> playerObj
+    }
+
+    val rows = new JSONArray()
+    for (r <- 0.to(4)) {
+      val row = new JSONArray()
+      for (c <- 0.to(4)) {
+        val roomObj = new JSONObject()
+        roomObj.put("row", r)
+        roomObj.put("col", c)
+        val playersInRoom = new JSONArray()
+        val room = game.map.rooms.find(_.location == Tuple2(r, c)).get
+        for (player <- room.players) {
+          players(player).put("row", r)
+          players(player).put("col", c)
+          playersInRoom.put(player)
+        }
+        val objectsInRoom = new JSONArray()
+        for (obj <- room.objects) {
+          val objObj = new JSONObject()
+          objObj.put("id", obj)
+          objObj.put("type", game.objects(obj)._type.name)
+          objectsInRoom.put(objObj)
+        }
+        roomObj.put("players", playersInRoom)
+        roomObj.put("objects", objectsInRoom)
+        roomObj.put("active", room.open)
+        row.put(roomObj)
+      }
+      rows.put(row)
+    }
+
+    val playerArray = new JSONArray()
+    for (playerObj <- players.values) {
+      playerArray.put(playerObj)
+    }
+
+    val actionArray = new JSONArray()
+    for (act <- game.chain) {
+      actionArray.put(act.toJsonObject())
+    }
+    obj.put("players", playerArray)
+    obj.put("rooms", rows)
+    obj.put("actions", actionArray)
+
+    obj.toString
+  }
+
+  def hash(str: String): String = DigestUtils.sha1Hex(str)
 }

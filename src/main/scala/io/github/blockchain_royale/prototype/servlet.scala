@@ -18,7 +18,7 @@ class GameServlet extends ScalatraServlet {
   post("/api/new_game") {
     games.synchronized {
       val newId = games.size + 1
-      games = games + (newId -> Game(newId, map = GameMap(Array()), chain = List(GenesisAct())))
+      games = games + (newId -> GameLogic.newGame(newId))
       newId.toString
     }
   }
@@ -32,11 +32,11 @@ class GameServlet extends ScalatraServlet {
 
       val (potentiallyStartedGame, started) =
         if (newGame.players.size == NUM_PLAYERS)
-          (GameUtils.startGame(newGame), true)
+          (GameLogic.startGame(newGame), true)
         else
           (newGame, false)
 
-      games = games + (game.id -> potentiallyStartedGame.copy(chain = NewPlayerAct(newPlayer.id, newPlayer.name) :: potentiallyStartedGame.chain))
+      games = games + (game.id -> potentiallyStartedGame.copy(chain = NewPlayerGA(newPlayer.id, newPlayer.name) :: potentiallyStartedGame.chain))
       s"${newPlayer.id.toString} $started"
     }
   }
@@ -61,7 +61,7 @@ class GameServlet extends ScalatraServlet {
 
         val potentiallyKilledPlayer = if (!destRoom.open) game.copy(stats = game.stats + (playerId -> (game.stats(playerId).copy(alive = false)))) else game
 
-        games += gameId -> potentiallyKilledPlayer.copy(chain = PlayerMoveAct(playerId, params("direction")) :: game.chain)
+        games += gameId -> potentiallyKilledPlayer.copy(chain = PlayerMoveGA(playerId, params("direction")) :: game.chain)
         newCoord
       } else {
         "400 Dead players tell no lies"
@@ -82,7 +82,7 @@ class GameServlet extends ScalatraServlet {
           game.map.rooms(roomIdx) = room.copy(objects = room.objects.filter(_ != objectId))
           games += (gameId -> game.copy(
             holding = game.holding + (playerId -> (game.holding(playerId) ++ List(objectId))),
-            chain = PlayerPickAct(playerId, objectId) :: game.chain))
+            chain = PlayerPickGA(playerId, objectId) :: game.chain))
           s"$objectId"
         } else {
           "400 object is not there"
@@ -107,7 +107,7 @@ class GameServlet extends ScalatraServlet {
           val (roomOwn, roomOwnIdx) = game.map.rooms.zipWithIndex.find(_._1.players.contains(playerId)).get
           val (roomOther, roomOtherIdx) = game.map.rooms.zipWithIndex.find(_._1.players.contains(otherId)).get
           if (roomOwnIdx != roomOtherIdx) {
-            games += gameId -> game.copy(chain = PlayerStartAttackAct(playerId, otherId, actionsHash) :: game.chain)
+            games += gameId -> game.copy(chain = PlayerStartAttackGA(playerId, otherId, actionsHash) :: game.chain)
             actionsHash
           } else {
             "400 player is not there"
@@ -143,29 +143,29 @@ class GameServlet extends ScalatraServlet {
           "400 player is not there"
         } else {
           val start = game.chain.find(act => act match {
-            case PlayerStartAttackAct(p, o, _) => p == playerId && o == otherId
+            case PlayerStartAttackGA(p, o, _) => p == playerId && o == otherId
             case _                             => false
-          }).map(_.asInstanceOf[PlayerStartAttackAct])
+          }).map(_.asInstanceOf[PlayerStartAttackGA])
           if (!start.isDefined) {
             "400 you never started the attack"
           } else if (!(start.get.actionsHash.equals(GameUtils.hash(actionsJson)))) {
             "400 hashes do not match! cheater!"
           } else {
-            val act = PlayerFinishAttackAct(playerId, otherId, actionsJson)
+            val act = PlayerFinishAttackGA(playerId, otherId, actionsJson)
             val gameChained = game.copy(chain = act :: game.chain)
             val otherStart = game.chain.find(act => act match {
-              case PlayerStartAttackAct(p, o, _) => p == otherId && o == playerId
+              case PlayerStartAttackGA(p, o, _) => p == otherId && o == playerId
               case _                             => false
-            }).map(_.asInstanceOf[PlayerStartAttackAct])
+            }).map(_.asInstanceOf[PlayerStartAttackGA])
             val otherAttack = game.chain.find(act => act match {
-              case PlayerFinishAttackAct(p, o, _) => p == otherId && o == playerId
+              case PlayerFinishAttackGA(p, o, _) => p == otherId && o == playerId
               case _                              => false
-            }).map(_.asInstanceOf[PlayerFinishAttackAct])
+            }).map(_.asInstanceOf[PlayerFinishAttackGA])
             val (possiblyCombatChained, msg) = if (otherStart.isDefined && otherAttack.isDefined && otherAttack.get.timestamp > otherStart.get.timestamp) {
               // execute combat
-              val (startA, startB, outcome) = GameUtils.combat(act, otherAttack.get, game.objects)
+              val (startA, startB, outcome) = GameLogic.combat(act, otherAttack.get, game.objects)
               val combatChained = gameChained.copy(chain =
-                CombatAct(playerId, otherId, startA, startB, actionsJson, otherAttack.get.actionsString, outcome) :: gameChained.chain)
+                CombatGA(playerId, otherId, startA, startB, actionsJson, otherAttack.get.actionsString, outcome) :: gameChained.chain)
 
               if (outcome.dead.size > 0) {
                 // process deaths
