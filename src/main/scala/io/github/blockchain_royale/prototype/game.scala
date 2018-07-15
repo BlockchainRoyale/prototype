@@ -154,6 +154,8 @@ case class Game(id: GameId,
                 chain: List[GameAction])
 
 object GameLogic {
+  
+  val random: Random = new Random(42)
 
   def newGame(id: Int): Game = Game(id, map = GameMap(Array()), chain = List(GenesisGA()))
 
@@ -163,7 +165,7 @@ object GameLogic {
     var newHolding: Map[PlayerId, List[ObjectId]] = Map()
 
     // given guns
-    def newObject(objectId: ObjectId) = Object(objectId, ALL_OBJECTS(Random.nextInt(ALL_OBJECTS.size)))
+    def newObject(objectId: ObjectId) = Object(objectId, ALL_OBJECTS(random.nextInt(ALL_OBJECTS.size)))
     for (_id <- game.players.keys) {
       val objectId = objectCount
       objectCount += 1
@@ -174,7 +176,7 @@ object GameLogic {
     // drop objects
     var objectsAtRoom: Map[Coord, List[ObjectId]] = Map()
     for (_ <- 1.to(TOTAL_OBJECTS - NUM_PLAYERS)) {
-      val coord = Tuple2(Random.nextInt(MAP_SIZE), Random.nextInt(MAP_SIZE))
+      val coord = Tuple2(random.nextInt(MAP_SIZE), random.nextInt(MAP_SIZE))
       val objectId = objectCount
       objectCount += 1
       objectsAtRoom += (coord -> (objectsAtRoom.getOrElse(coord, List()) ++ List(objectId)))
@@ -184,7 +186,7 @@ object GameLogic {
     // pick initial position for players
     var initialPos: Map[Coord, List[PlayerId]] = Map()
     for (_id <- game.players.keys) {
-      val coord = Tuple2(Random.nextInt(MAP_SIZE), Random.nextInt(MAP_SIZE))
+      val coord = Tuple2(random.nextInt(MAP_SIZE), random.nextInt(MAP_SIZE))
       initialPos += (coord -> (initialPos.getOrElse(coord, List()) ++ List(_id)))
     }
 
@@ -538,9 +540,9 @@ object GameUtils {
     }
 
     val rows = new JSONArray()
-    for (r <- 0.to(MAP_SIZE)) {
+    for (r <- 0.to(MAP_SIZE - 1)) {
       val row = new JSONArray()
-      for (c <- 0.to(MAP_SIZE)) {
+      for (c <- 0.to(MAP_SIZE - 1)) {
         val roomObj = new JSONObject()
         roomObj.put("row", r)
         roomObj.put("col", c)
