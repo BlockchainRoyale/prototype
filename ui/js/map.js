@@ -7,9 +7,9 @@ const keccak256 = require('js-sha3').keccak256;*/
 //Player address, x, y, name, weapons...
 
 var dummyData = [
-    ["faddress1", 0, 4, "Quinn QuickHands", "Shotgun", "Pistol", "Shovel"],
-    ["faddress2", 0, 4, "Sammy Shooter", "Rifle", "Gun", "Shovel", "Branch"],
-    ["faddress3", 0, 4, "Will the winner", "Sniper", "Minigun", "Deagle"]
+    ["faddress1", 0, 4, "Daenerys Targaryen", "Shotgun", "Pistol", "Shovel"],
+    ["faddress2", 2, 3, "Cersei Lannister", "Rifle", "Gun", "Shovel", "Branch"],
+    ["faddress3", 5, 1, "Jon Snow", "Sniper", "Minigun", "Deagle"]
 ];
 
 //Player Locations are stored here
@@ -68,6 +68,7 @@ var playerLocations = [
 //Player ID, cards
 var playerInfo = [];
 
+var playerDisplayed = 0;
 
 function setup() {
     fillInformation();
@@ -120,7 +121,7 @@ function moveLeft(){
 
 function mapRedraw() {
     drawtiles();
-    playerList();
+    playerInfoUpdate();
     drawMap();
     drawPlayerLocations();
 }
@@ -217,13 +218,20 @@ function playerInformation() {
         cardText.innerHTML += playerInfo[i][x] + '<br>';
     }
 }
-function playerList() {
+function playerInfoUpdate() {
     var playerList = document.getElementById("listOfPlayers");
     playerList.innerHTML = '';
     for (let x = 0; x < dummyData.length; x++) {
         playerList.innerHTML += '<li><button>' + dummyData[x][3] + '</button></li>';
     }
+    var playerName = document.getElementById("playerNameDisplay");
+    playerName.innerHTML = dummyData[currentPlayer][3];
+    var address = document.getElementById("addressDisplay");
+    address.innerHTML = dummyData[currentPlayer][0];
+    var location = document.getElementById("locationDisplay");
+    location.innerHTML = dummyData[currentPlayer][1] + ',' + dummyData[currentPlayer][2];
 }
+
 
 function battleRequests() {
     document.getElementById("requests").innerHTML = '';
