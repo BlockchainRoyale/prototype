@@ -1,7 +1,36 @@
+#container {
+    width: 1000px;
+    margin: 20px auto 0 auto;
+    display: grid;
+    grid-template-columns: 700px 300px;
+}
+
+#mapContainer {
+    background-color: black;
+    height: 640px;
+    width: 640px;
+}
 #arena {
     margin: 20px;
     border: 1px solid black;
     float: left;
+}
+
+#arenaContainer {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background-color: silver;
+    border: 5px solid grey;
+    visibility: hidden;
+    z-index: 1000;
+    height: 450px;
+    width: 600px;
+}
+
+#map {
+    border: 1px solid white;
+    margin: 20px;
 }
 
 #battleInfo {
@@ -31,30 +60,6 @@
     top: 350px;
 }
 
-
-#arenaContainer {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    background-color: silver;
-    border: 5px solid grey;
-    visibility: hidden;
-    z-index: 1000;
-    height: 450px;
-    width: 600px;
-}
-
-#map {
-    border: 1px solid white;
-    margin: 20px;
-}
-
-#mapContainer {
-    background-color: black;
-    float: left;
-    height: 640px;
-    width: 640px;
-}
 
 #showBattle {
     float: left;
