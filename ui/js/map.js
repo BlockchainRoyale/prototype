@@ -75,7 +75,7 @@ function setup() {
     fillInformation();
     menuSelect();
 }
-
+var currentPlayer = 0;
 var yourLocation = [5, 3];
 var yourAddress = "asdf";
 
