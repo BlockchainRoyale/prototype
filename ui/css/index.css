@@ -1,3 +1,12 @@
+body{
+    height: 100vh;
+    width: 100%;
+    background: #000000;
+    background-image: url("../../frontend/img/mountain.jpeg");
+    position:fixed;
+    font-family: 'VT323', monospace;
+}
+
 #container {
     width: 100%;
     margin: 20px auto 0 auto;
@@ -18,6 +27,29 @@
     margin-left: auto;
     margin-right: auto;
 }
+
+#middle-column {
+    display: flex;
+    flex-direction: column;
+}
+
+#players-column {
+    display: flex;
+    flex-direction: column;
+    justify-items: center;
+    text-align: center;
+}
+#listOfPlayers {
+    list-style-type: none;
+}
+
+#listOfPlayers button {
+    width: 100%;
+    height: 50px;
+    font-family: inherit;
+    font-size: 16pt;
+}
+
 #arena {
     margin: 20px;
     border: 1px solid black;
@@ -80,7 +112,6 @@
     margin: 20px 20px 0 20px;
     padding: 0 20px 20px 20px;
     border: solid black 1px;
-    background-color: green;
 }
 
 #playerCards {
@@ -92,15 +123,19 @@
 
 #menu {
     border: 1px solid black;
-    background-color: pink;
 }
 
 #movement {
     margin-top: 10%;
+    margin-left: auto;
+    margin-right: auto;
     border: 1px solid black;
     padding: 10px;
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
+    width: 140px;
+    height: 90px;
+
 }
 
 #up {
@@ -109,14 +144,7 @@
 }
 
 #right {
-    grid-column-start: 3;
     border-radius: 0 5px 5px 0;
-}
-
-#down {
-    grid-row-start: 3;
-    grid-column-start: 2;
-    border-radius: 0 0 5px 5px;
 }
 
 #left{
@@ -151,4 +179,8 @@
     border: solid black 1px;
     width: 200px;
     height: 100px;
+}
+
+h1 {
+    color: #ffffff;
 }
