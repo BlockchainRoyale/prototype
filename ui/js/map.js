@@ -5,6 +5,7 @@ const keccak256 = require('js-sha3').keccak256;*/
 
 //hash();
 //Player address, x, y, name, weapons...
+
 var dummyData = [
     ["faddress1", 0, 4, "Bob", "Shotgun", "Pistol", "Shovel"],
     ["faddress2", 0, 4, "Freddie Fish", "Rifle", "Gun", "Shovel", "Branch"],
@@ -44,15 +45,18 @@ angryPeople[2] = ["asdf", 1, 3, "fakeaddress3"];
 
 const colors = ['red', 'purple', 'indigo', 'blue', 'green', 'yellow', 'orange', 'brown', 'light blue'];
 
-const GRIDSIZE = document.getElementById("map").width / 7;
-const MAXSIZE = document.getElementById("map").width;
-const ICONSIZE = GRIDSIZE / 6;
+var gridsize = document.getElementById("map").width / 7;
+var MAXSIZE = document.getElementById("map").width;
+const ICONSIZE = gridsize / 6;
 
 const ASIZE = document.getElementById("arena").width / 5;
 const MAXASIZE = document.getElementById("arena").width;
 const AICONSIZE = ASIZE / 3;
 
+initialize();
+
 function mapRedraw() {
+    gridsize = map.width / 7;
     drawMap();
     drawPlayerLocations();
 }
@@ -62,11 +66,11 @@ function drawMap() {
     ctx.strokeStyle = "white";
     ctx.clearRect(0, 0, map.width, map.height);
     ctx.beginPath();
-    for (let x = GRIDSIZE; x < MAXSIZE; x = x + GRIDSIZE) {
+    for (let x = gridsize; x < MAXSIZE; x = x + gridsize) {
         ctx.moveTo(x, 0);
         ctx.lineTo(x, MAXSIZE);
     }
-    for (let y = GRIDSIZE; y < MAXSIZE; y = y + GRIDSIZE) {
+    for (let y = gridsize; y < MAXSIZE; y = y + gridsize) {
         ctx.moveTo(0, y);
         ctx.lineTo(MAXSIZE, y);
     }
@@ -91,8 +95,8 @@ function drawPlayerLocations() {
             xCo = 1;
             alreadyHere = false;
             for (let x = 0; numPlayers < playerLocations[i][2]; x++) {
-                curX = (GRIDSIZE * playerLocations[i][0]) + (((GRIDSIZE / 4.5) - (ICONSIZE / 2)) * xCo);
-                curY = (GRIDSIZE * playerLocations[i][1]) + (((GRIDSIZE / 4.5) - (ICONSIZE / 2)) * yCo);
+                curX = (gridsize * playerLocations[i][0]) + (((gridsize / 4.5) - (ICONSIZE / 2)) * xCo);
+                curY = (gridsize * playerLocations[i][1]) + (((gridsize / 4.5) - (ICONSIZE / 2)) * yCo);
                 if(playerLocations[i][0] == yourLocation[0] && playerLocations[i][1] == yourLocation[1] && !alreadyHere){
                     ctx.fillStyle = colors[4];
                     alreadyHere = true;
@@ -109,12 +113,12 @@ function drawPlayerLocations() {
                 }
             }
         } else {
-            curX = (GRIDSIZE * playerLocations[i][0] + (GRIDSIZE * 7/25));
-            curY = (GRIDSIZE * playerLocations[i][1]) + (GRIDSIZE * (3 / 5));
+            curX = (gridsize * playerLocations[i][0] + (gridsize * 7/25));
+            curY = (gridsize * playerLocations[i][1]) + (gridsize * (3 / 5));
             if(playerLocations[i][0] == yourLocation[0] && playerLocations[i][1] == yourLocation[1]){
-                ctx.drawImage(tooManyG, 5 + (GRIDSIZE * playerLocations[i][0]), 5 + (GRIDSIZE * playerLocations[i][1]), GRIDSIZE - 10, GRIDSIZE - 10);
+                ctx.drawImage(tooManyG, 5 + (gridsize * playerLocations[i][0]), 5 + (gridsize * playerLocations[i][1]), gridsize - 10, gridsize - 10);
             }else {
-                ctx.drawImage(tooManyR, 5 + (GRIDSIZE * playerLocations[i][0]), 5 + (GRIDSIZE * playerLocations[i][1]), GRIDSIZE - 10, GRIDSIZE - 10);
+                ctx.drawImage(tooManyR, 5 + (gridsize * playerLocations[i][0]), 5 + (gridsize * playerLocations[i][1]), gridsize - 10, gridsize - 10);
             }
 
             ctx.font = "200% Courier New";
@@ -364,7 +368,18 @@ function displayLog() {
     input.style.display = 'none';
 }
 
+function initialize() {
+    window.addEventListener('resize', resizeCanvas, false);
+    resizeCanvas();
+}
 
+function resizeCanvas() {
+    if (window.innerHeight < 700) {
+        map.width = window.innerHeight * 0.9;
+        map.height = window.innerHeight * 0.9;
+        mapRedraw();
+    }
+}
 /*
 function fillInformation() {
     for(let i=0; i< dummyData.length; i++){
