@@ -51,7 +51,7 @@ body{
 
 #battleInfo {
     float: left;
-    overflow: scroll;
+    overflow-y: scroll;
     margin: 20px 0px 20px 20px;
     border: 1px solid black;
     width: 210px;
@@ -60,7 +60,7 @@ body{
 
 #battleInput {
     float: left;
-    overflow: scroll;
+    overflow-y: scroll;
     margin: 20px 0px 20px 20px;
     border: 1px solid black;
     width: 210px;
@@ -92,7 +92,7 @@ body{
 }
 
 #playerCards {
-    overflow: scroll;
+    overflow-y: scroll;
     border: solid black 1px;
     width: 200px;
     height: 100px;
