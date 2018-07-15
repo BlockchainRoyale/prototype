@@ -5,56 +5,58 @@
     <link rel="stylesheet" href="css/index.css">
 </head>
 <body onLoad="setup(), mapRedraw(), playerInfoSetup(), battleRequests()">
-<div id="container" style="border: solid black 1px; width: 950px; height: 700px">
+
+<div id="container">
     <div id="mapContainer" >
         <img src="assets/TooManyRedT.png" id="TooManyR" style="display:none">
         <img src="assets/TooManyGreenT.png" id="TooManyG" style="display:none">
 
         <canvas id="map" height="600px" width="600px"></canvas>
     </div>
-    <div id="arenaContainer">
-        <canvas id="arena" height="300px" width="300px"></canvas>
-        <div id="battleInfo">asdf</div>
-        <div id="battleInput"></div>
-        <div id="battleBtns">
-            <button id="battleLogbtn" onclick="displayLog()">Log</button>
-            <button id="battleInputbtn" onclick="displayInputs()">Input</button>
-        </div>
-    </div>
-    <div id="menu" height="500px">
-        <!--Player Info-->
-        <div id="infoContainer">
-            <div id="playerInfo">
-                <h1 id="details"></h1>
-                <div id="playerCards"></div>
+    <div id ="right-column">
+        <div id="arenaContainer">
+            <canvas id="arena" height="300px" width="300px"></canvas>
+            <div id="battleInfo">asdf</div>
+            <div id="battleInput"></div>
+            <div id="battleBtns">
+                <button id="battleLogbtn" onclick="displayLog()">Log</button>
+                <button id="battleInputbtn" onclick="displayInputs()">Input</button>
             </div>
-            <select style="z-index: 100" id="playerInfoInput" onchange="playerInformation()"></select>
+        </div>
+        <div id="menu" height="500px">
+            <!--Player Info-->
+            <div id="infoContainer">
+                <div id="playerInfo">
+                    <h1 id="details"></h1>
+                    <div id="playerCards"></div>
+                </div>
+                <select style="z-index: 100" id="playerInfoInput" onchange="playerInformation()"></select>
+            </div>
+
+            <div id="battleRequests">
+                <h3>Battle Requests</h3>
+                <div  id="requests"></div>
+            </div>
+            <select id="menuSelection" onchange="menuSelect()">
+                <option value="1">Player Info</option>
+                <option value="2">Battle Requests</option>
+                <option value="3">Location List</option>
+                <option value="4">Your Inventory</option>
+            </select>
         </div>
 
-        <div id="battleRequests">
-            <h3>Battle Requests</h3>
-            <div  id="requests"></div>
+        <div id="uiButtons">
+            <button id="showBattle" onclick="swapCanvas()">Show Battle</button>
         </div>
-        <select id="menuSelection" onchange="menuSelect()">
-            <option value="1">Player Info</option>
-            <option value="2">Battle Requests</option>
-            <option value="3">Location List</option>
-            <option value="4">Your Inventory</option>
-        </select>
-    </div>
 
-    <div id="uiButtons">
-        <button id="showBattle" onclick="swapCanvas()">Show Battle</button>
+        <div id="movement" class="float-right">
+            <button id="up" class="movebutton"><img src="assets/movement/up-arrow.png"> </button><br>
+            <button id="left" class="movebutton"><img src="assets/movement/left-arrow.png"></button>
+            <div id = "centerbutton"></div>
+            <button id="right" class="movebutton"><img src="assets/movement/right-arrow.png"></button>
+            <button id="down" class="movebutton"><img src="assets/movement/down-arrow.png"></button>
+        </div>
     </div>
-
-    <div id="movement" class="float-right">
-        <button id="up" class="movebutton"><img src="assets/movement/up-arrow.png"> </button><br>
-        <button id="left" class="movebutton"><img src="assets/movement/left-arrow.png"></button>
-        <div id = "centerbutton"></div>
-        <button id="right" class="movebutton"><img src="assets/movement/right-arrow.png"></button>
-        <button id="down" class="movebutton"><img src="assets/movement/down-arrow.png"></button>
-    </div>
-
 </div>
 <script src="js/map.js"></script>
 </body>
