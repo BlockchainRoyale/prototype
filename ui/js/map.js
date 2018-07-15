@@ -7,9 +7,9 @@ const keccak256 = require('js-sha3').keccak256;*/
 //Player address, x, y, name, weapons...
 
 var dummyData = [
-    ["faddress1", 0, 4, "Bob", "Shotgun", "Pistol", "Shovel"],
-    ["faddress2", 0, 4, "Freddie Fish", "Rifle", "Gun", "Shovel", "Branch"],
-    ["faddress3", 0, 4, "Job", "Sniper", "Minigun", "Deagle"]
+    ["faddress1", 0, 4, "Quinn QuickHands", "Shotgun", "Pistol", "Shovel"],
+    ["faddress2", 0, 4, "Sammy Shooter", "Rifle", "Gun", "Shovel", "Branch"],
+    ["faddress3", 0, 4, "Will the winner", "Sniper", "Minigun", "Deagle"]
 ];
 
 //Player Locations are stored here
@@ -78,6 +78,7 @@ function moveLeft(){
 
 function mapRedraw() {
     drawtiles();
+    playerList();
     drawMap();
     drawPlayerLocations();
 }
@@ -172,6 +173,13 @@ function playerInformation() {
     cardText.innerHTML = '';
     for (let x = 4; x < playerInfo[i].length; x++) {
         cardText.innerHTML += playerInfo[i][x] + '<br>';
+    }
+}
+function playerList() {
+    var playerList = document.getElementById("listOfPlayers");
+    playerList.innerHTML = '';
+    for (let x = 0; x < dummyData.length; x++) {
+        playerList.innerHTML += '<li><button>' + dummyData[x][3] + '</button></li>';
     }
 }
 
