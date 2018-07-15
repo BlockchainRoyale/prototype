@@ -27,6 +27,7 @@ var playerInfo = [];
 
 function setup(){
     fillInformation();
+    menuSelect();
 }
 
 
@@ -188,13 +189,36 @@ function drawMap() {
     ctx.stroke();
     drawPlayerLocations();
 }
-
+/*
 function hash() {
     var arrayStuff = [1, 2, 3, 4, 5];
     console.log(keccak256(arrayStuff));
 }
+*/
 
-
+function menuSelect() {
+    var playerInventories = document.getElementById("infoContainer");
+    var battleRequest = document.getElementById("battleRequests");
+    var selection = document.getElementById("menuSelection").value;
+    console.log("asdf: (" + selection + ")");
+    switch(selection){
+        case "1":
+            console.log("InfoContainer");
+            playerInventories.style.display = 'block';
+            battleRequest.style.display = 'none';
+            break;
+        case "2":
+            console.log("InfoContainer");
+            playerInventories.style.display = 'none';
+            battleRequest.style.display = 'block';
+            break;
+        default:
+            console.log("None");
+            playerInventories.style.display = 'block';
+            battleRequest.style.display = 'none';
+            break;
+    }
+}
 
 /*
 function fillInformation() {

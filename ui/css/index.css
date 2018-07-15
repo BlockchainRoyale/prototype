@@ -26,12 +26,44 @@
 
 #battleBtn {
     float: left;
-    margin-left: 20px;
+    margin: 20px 10px 0 20px;
 }
 
 #infoContainer {
+    display: none;
     float: left;
     margin: 20px 20px 0 20px;
     padding: 0 20px 20px 20px;
     border: solid black 1px;
+}
+
+#playerCards {
+    overflow: scroll;
+    border: solid black 1px;
+    width: 200px;
+    height: 100px;
+}
+
+#menu {
+    border: 1px solid black;
+}
+
+#movement {
+    border: 1px solid black;
+    padding: 10px;
+    position: fixed;
+    top: 580px;
+    left: 720px;
+}
+
+#battleRequests {
+    float: left;
+    margin: 20px;
+    padding: 0 10px 10px 10px;
+    border: solid black 1px;
+    display: none;
+}
+
+#menuSelection {
+    margin: 10px 10px 10px 20px;
 }

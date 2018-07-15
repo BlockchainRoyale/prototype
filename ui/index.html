@@ -15,25 +15,39 @@
     <div id="arenaContainer" height="500px" width="500px">
         <canvas id="arena" height="460px" width="460px"></canvas>
     </div>
-
-    <!--Player Info-->
-    <div id="infoContainer">
-        <div id="playerInfo">
-            <h1 id="details"></h1>
-            <div style="overflow:scroll; border: solid black 1px; width: 200px; height: 100px" id="playerCards"></div>
-        </div>
-        <form>
+    <div id="menu" height="500px">
+        <!--Player Info-->
+        <div id="infoContainer">
+            <div id="playerInfo">
+                <h1 id="details"></h1>
+                <div id="playerCards"></div>
+            </div>
             <select style="z-index: 100" id="playerInfoInput" onchange="playerInformation()"></select>
-        </form>
+        </div>
+
+        <div id="battleRequests" >
+            <h3>Battle Requests</h3>
+            <div style="overflow:scroll; border: solid black 1px; width: 200px; height: 100px" id="requests"></div>
+        </div>
+        <select id="menuSelection" onchange="menuSelect()">
+            <option value="1">Player Info</option>
+            <option value="2">Battle Requests</option>
+            <option value="3">Location List</option>
+            <option value="4">Your Inventory</option>
+        </select>
     </div>
 
-    <div id="battleRequests" style="float: left; margin: 20px; padding: 0 10px 10px 10px; border: solid black 1px">
-        <h3>Battle Requests</h3>
-        <div style="overflow:scroll; border: solid black 1px; width: 200px; height: 100px" id="requests"></div>
-    </div>
     <div id="uiButtons">
         <button id="battleBtn" onclick="swapCanvas()">Show Battle</button>
     </div>
+
+    <div id="movement" width="100px" height="50px" >
+        <button id="up" style="position: relative; left:27px; margin-bottom: 5px;"><b>^</b></button><br>
+        <button id="left"><b><</b></button>
+        <button id="down"><b>v</b></button>
+        <button id="right"><b>></b></button>
+    </div>
+
 </div>
 <script src="js/map.js"></script>
 </body>
