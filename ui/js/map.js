@@ -255,6 +255,12 @@ function playerInfoUpdate() {
     address.innerHTML = dummyData[currentPlayer][0];
     var location = document.getElementById("locationDisplay");
     location.innerHTML = dummyData[currentPlayer][1] + ',' + dummyData[currentPlayer][2];
+    var weapons = document.getElementById("weaponsDisplay");
+    weapons.innerHTML = '';
+    for(var i = 4; i < dummyData[currentPlayer].length; i++) {
+        weapons.innerHTML += '<li>' + dummyData[currentPlayer][i] + '</li>';
+    }
+
 }
 
 
