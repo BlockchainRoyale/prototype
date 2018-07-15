@@ -75,6 +75,7 @@ function setup() {
     fillInformation();
     menuSelect();
 }
+
 var currentPlayer = 0;
 var yourLocation = [5, 3];
 var yourAddress = "asdf";
@@ -104,36 +105,45 @@ function findLocation() {
     var out = yourLocation[0] * 7 + yourLocation[1];
 }
 
-function moveUp(){
-    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
-    yourLocation[1]--;
-    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
-    battleRequests();
-    mapRedraw();
+function moveUp() {
+    if (yourLocation[1] > 0) {
+        playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
+        yourLocation[1]--;
+        playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
+        battleRequests();
+        mapRedraw();
+    }
 }
 
-function moveRight(){
-    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
-    yourLocation[0]++
-    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
-    battleRequests();
-    mapRedraw();
+function moveRight() {
+    if (yourLocation[0] < 6) {
+        playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
+        yourLocation[0]++
+        playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
+        battleRequests();
+        mapRedraw();
+    }
 }
 
-function moveDown(){
-    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
-    yourLocation[1]++;
-    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
-    battleRequests();
-    mapRedraw();
+function moveDown() {
+    if (yourLocation[1] < 6) {
+        playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
+        yourLocation[1]++;
+        playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
+        battleRequests();
+        mapRedraw();
+    }
 }
 
-function moveLeft(){
-    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
-    yourLocation[0]--
-    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
-    battleRequests();
-    mapRedraw();
+function moveLeft() {
+    if (yourLocation[0] > 0) {
+        playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
+        yourLocation[0]--
+        playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
+        battleRequests();
+        mapRedraw();
+    }
+
 }
 
 function mapRedraw() {
@@ -211,7 +221,7 @@ function drawPlayerLocations() {
     }
 }
 
-function submitInputs(){
+function submitInputs() {
     var textArea = document.getElementById("inputTextArea");
     var stuff = textArea.value;
     textArea.value = '';
@@ -242,6 +252,7 @@ function playerInformation() {
         cardText.innerHTML += playerInfo[i][x] + '<br>';
     }
 }
+
 function playerList() {
     var playerList = document.getElementById("listOfPlayers");
     playerList.innerHTML = '';
