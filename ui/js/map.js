@@ -8,8 +8,8 @@ const keccak256 = require('js-sha3').keccak256;*/
 var dummyData = [
     ["faddress1", 0, 4, "Bob", "Shotgun", "Pistol", "Shovel"],
     ["faddress2", 0, 4, "Freddie Fish", "Rifle", "Gun", "Shovel", "Branch"],
-    ["faddress3", 0, 4, "Bob", "Sniper", "Minigun", "Deagle"]
-]
+    ["faddress3", 0, 4, "Job", "Sniper", "Minigun", "Deagle"]
+];
 
 //Player Locations are stored here
 var playerLocations = [
@@ -23,39 +23,15 @@ var playerLocations = [
 //Player Information is stored here
 //Player ID, cards
 var playerInfo = [];
-fillInformation();
 
-/*
-playerInfo.push([]);
-playerInfo.push([]);
-playerInfo.push([]);
 
-playerInfo[0][0] = "fakeaddress1";
-playerInfo[0][1] = 1;
-playerInfo[0][2] = 2;
-playerInfo[0][3] = "Shotgun";
-playerInfo[0][4] = "Pistol";
-playerInfo[0][5] = "Shovel";
+function setup(){
+    fillInformation();
+}
 
-playerInfo[1][0] = "fakeaddress2";
-playerInfo[1][1] = 2;
-playerInfo[1][2] = 4;
-playerInfo[1][3] = "Sniper";
-playerInfo[1][4] = "Grenade";
-playerInfo[1][5] = "Shotgun";
-playerInfo[1][6] = "RPG";
 
-playerInfo[2][0] = "fakeaddress3";
-playerInfo[2][1] = 5;
-playerInfo[2][2] = 3;
-playerInfo[2][3] = "Sniper";
-playerInfo[2][4] = "Grenade";
-playerInfo[2][5] = "Pistol";
-playerInfo[2][6] = "RPG";
-playerInfo[2][7] = "Minigun";
-*/
 
-var yourLocation = [1,2];
+var yourLocation = [5,3];
 var yourAddress = "asdf";
 
 var angryPeople = [];
@@ -76,6 +52,7 @@ const ICONSIZE = GRIDSIZE / 6;
 function drawMap() {
     var map = document.getElementById("map");
     var ctx = map.getContext("2d");
+    ctx.strokeStyle = "white";
     ctx.clearRect(0, 0, map.width, map.height);
     ctx.beginPath();
     for (let x = GRIDSIZE; x < MAXSIZE; x = x + GRIDSIZE) {
@@ -134,7 +111,7 @@ function drawPlayerLocations() {
             }
 
             ctx.font = "200% Courier New";
-            ctx.fillStyle = "black";
+            ctx.fillStyle = "white";
             ctx.fillText(playerLocations[i][2], curX, curY);
         }
 
@@ -146,7 +123,7 @@ function playerInfoSetup() {
     var select = document.getElementById("playerInfoInput");
     for(let i = 0; i < playerInfo.length;i++){
         option = document.createElement("option");
-        option.innerHTML = i;
+        option.innerHTML = playerInfo[i][3];
         option.value = i;
         select.add(option);
     }
@@ -175,7 +152,7 @@ function battleRequests() {
 }
 
 function fillInformation() {
-    for(let i=0; i< dummyData.length; i++){
+    for(let i=0; i<dummyData.length; i++){
         playerInfo.push([]);
         for(let n=0; n<dummyData[i].length;n++){
             playerInfo[i][n] = dummyData[i][n];
@@ -183,10 +160,41 @@ function fillInformation() {
     }
 }
 
+//Arena Functions
+function swapCanvas() {
+    var arena = document.getElementById("arenaContainer");
+    console.log(arena.style.border);
+    if(arena.style.visibility == "visible"){
+        arena.style.visibility = "hidden";
+    }else{
+        arena.style.visibility = "visible";
+    }
+}
+
+function drawMap() {
+    var arena = document.getElementById("arena");
+    var ctx = map.getContext("2d");
+    ctx.strokeStyle = "white";
+    ctx.clearRect(0, 0, arena.width, arena.height);
+    ctx.beginPath();
+    for (let x = GRIDSIZE; x < MAXSIZE; x = x + GRIDSIZE) {
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, MAXSIZE);
+    }
+    for (let y = GRIDSIZE; y < MAXSIZE; y = y + GRIDSIZE) {
+        ctx.moveTo(0, y);
+        ctx.lineTo(MAXSIZE, y);
+    }
+    ctx.stroke();
+    drawPlayerLocations();
+}
+
 function hash() {
     var arrayStuff = [1, 2, 3, 4, 5];
     console.log(keccak256(arrayStuff));
 }
+
+
 
 /*
 function fillInformation() {

@@ -1,0 +1,37 @@
+#arena {
+    margin: 20px;
+}
+
+#arenaContainer {
+    position: fixed;
+    top: 10px;
+    left: 10px;
+    background-color: silver;
+    border: 5px solid grey;
+    visibility: hidden;
+    z-index: 1000;
+}
+
+#map {
+    border: 1px solid white;
+    margin: 20px;
+}
+
+#mapContainer {
+    background-color: black;
+    float: left;
+    height: 640px;
+    width: 640px;
+}
+
+#battleBtn {
+    float: left;
+    margin-left: 20px;
+}
+
+#infoContainer {
+    float: left;
+    margin: 20px 20px 0 20px;
+    padding: 0 20px 20px 20px;
+    border: solid black 1px;
+}
