@@ -4,6 +4,14 @@
     display: grid;
     grid-template-columns: 2fr 1fr 1fr;
 }
+#outcome {
+    border: 1px solid black;
+    position: fixed;
+    margin: 20px;
+    top: 350px;
+    width: 260px;
+    height: 50px;
+}
 
 #mapContainer {
     background-color: black;
