@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body onLoad="drawMap(), playerInfoSetup(), battleRequests()">
+<div id="container" style="border: solid black 1px; width: 1000px; height: 700px">
+    <div id="mapContainer" style="float:left; height:625px; width:625px">
+        <img src="assets/TooManyRed.png" id="TooManyR" style="display:none">
+        <img src="assets/TooManyGreen.png" id="TooManyG" style="display:none">
+        <canvas id="map" style="border: solid black 1px; margin: 20px" height="600px" width="600px"></canvas>
+        <canvas id="arena"></canvas>
+    </div>
+
+
+    <!--Player Info-->
+    <div id="infoContainer" style="float: left; margin: 20px; padding: 0 20px 20px 20px;; border: solid black 1px">
+        <div id="playerInfo">
+            <h1 id="details"></h1>
+            <div style="overflow:scroll; border: solid black 1px; width: 200px; height: 100px" id="playerCards"></div>
+        </div>
+        <form>
+            <select style="z-index: 100" id="playerInfoInput" onchange="playerInformation()"></select>
+            <!--<input id="playerInfoInput" type="select" onChange="playerInformation()">-->
+        </form>
+    </div>
+
+    <div id="battleRequests" style="float: left; margin: 20px; padding: 0 20px 20px 20px; border: solid black 1px">
+        <h1>Battle Requests</h1>
+        <div style="overflow:scroll; border: solid black 1px; width: 200px; height: 100px" id="requests"></div>
+    </div>
+</div>
+<script src="js/map.js"></script>
+<script data-main="scripts/main" src="scripts/require.js"></script>
+</body>
+
+</html>
