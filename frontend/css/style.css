@@ -19,9 +19,15 @@ body {
     margin-right: 5%;
     width: 90%;
     text-align: center;
+    font-family: 'Bangers', cursive;
+
 }
 
 .jumbotron {
     background:rgba(0,0,0,0.5);
     color: #ffffff;
+    font-size: 10vw;
+}
+h1{
+    font-size:7vw;
 }
