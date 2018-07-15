@@ -11,17 +11,40 @@
     <div id="mapContainer" >
         <img src="assets/TooManyRedT.png" id="TooManyR" style="display:none">
         <img src="assets/TooManyGreenT.png" id="TooManyG" style="display:none">
+        <img src="assets/DirtPath1.png" id="grid1" style="display:none">
+        <img src="assets/DirtPath2.png" id="grid2" style="display:none">
+        <img src="assets/DirtPath3.png" id="grid3" style="display:none">
+        <img src="assets/DirtPath4.png" id="grid4" style="display:none">
+        <img src="assets/DirtPath5.png" id="grid5" style="display:none">
+        <img src="assets/DirtPath6.png" id="grid6" style="display:none">
+        <img src="assets/DirtPath7.png" id="grid7" style="display:none">
+        <img src="assets/DirtPath8.png" id="grid8" style="display:none">
+        <img src="assets/Extra1.png" id="extra1" style="display:none">
+        <img src="assets/Extra2.png" id="extra2" style="display:none">
+        <img src="assets/FlowerGrass1.png" id="fg1" style="display:none">
+        <img src="assets/FlowerGrass2.png" id="fg2" style="display:none">
+        <img src="assets/FlowerGrass3.png" id="fg3" style="display:none">
+        <img src="assets/FlowerGrass4.png" id="fg4" style="display:none">
+        <img src="assets/Grass1.png" id="gr1" style="display:none">
+        <img src="assets/Grass2.png" id="gr2" style="display:none">
+        <img src="assets/Grass3.png" id="gr3" style="display:none">
+        <img src="assets/Grass4.png" id="gr4" style="display:none">
 
         <canvas id="map" height="600px" width="600px"></canvas>
     </div>
     <div id ="middle-column">
         <div id="arenaContainer">
             <canvas id="arena" height="300px" width="300px"></canvas>
-            <div id="battleInfo">asdf</div>
-            <div id="battleInput"></div>
+            <div id="battleInfo"></div>
+            <div id="battleInput">
+
+            </div>
             <div id="battleBtns">
-                <button id="battleLogbtn" onclick="displayLog()">Log</button>
+                <button id="battleLogbtn" onclick="displayLog(), redrawArena()">Log</button>
                 <button id="battleInputbtn" onclick="displayInputs()">Input</button>
+            </div>
+            <div id="outcome">
+                <p style="margin-left: 10px; padding: 0px">Outcome: <span id="outText"></span></p>
             </div>
         </div>
         <div id="menu" height="500px">
@@ -51,11 +74,11 @@
         </div>
 
         <div id="movement" class="float-right">
-            <button id="up" class="movebutton"><img src="assets/movement/up-arrow.png"> </button><br>
-            <button id="left" class="movebutton"><img src="assets/movement/left-arrow.png"></button>
+            <button id="up" class="movebutton" onclick="moveUp()"><img src="assets/movement/up-arrow.png"> </button><br>
+            <button id="left" class="movebutton" onclick="moveLeft()"><img src="assets/movement/left-arrow.png"></button>
             <div id = "centerbutton"></div>
-            <button id="right" class="movebutton"><img src="assets/movement/right-arrow.png"></button>
-            <button id="down" class="movebutton"><img src="assets/movement/down-arrow.png"></button>
+            <button id="right" class="movebutton" onclick="moveRight()"><img src="assets/movement/right-arrow.png"></button>
+            <button id="down" class="movebutton" onclick="moveDown()"><img src="assets/movement/down-arrow.png"></button>
         </div>
     </div>
     <div id="players-column">
