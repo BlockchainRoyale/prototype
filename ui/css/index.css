@@ -84,7 +84,6 @@ body{
 
 #battleInput {
     float: left;
-    overflow-y: scroll;
     margin: 20px 0px 20px 20px;
     border: 1px solid black;
     width: 210px;
