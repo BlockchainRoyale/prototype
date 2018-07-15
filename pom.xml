@@ -164,6 +164,14 @@
 						<program>
 							<mainClass>io.github.blockchain_royale.prototype.Server</mainClass>
 							<name>server</name>
+							<jvmSettings>
+								<initialMemorySize>1G</initialMemorySize>
+								<maxMemorySize>5G</maxMemorySize>
+								<maxStackSize>256m</maxStackSize>
+								<extraArguments>
+									<extraArgument>-Dcom.sun.management.jmxremote</extraArgument>
+								</extraArguments>
+							</jvmSettings>
 						</program>
 					</programs>
 				</configuration>

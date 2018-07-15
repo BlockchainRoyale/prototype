@@ -79,10 +79,11 @@ class GameServlet extends ScalatraServlet {
       if (stats.alive) {
         val (room, roomIdx) = game.map.rooms.zipWithIndex.find(_._1.players.contains(playerId)).get
         if (room.objects.contains(objectId)) {
-          game.map.rooms(roomIdx) = room.copy(objects = room.objects.filterNot(_ == objectId))
-          games += gameId -> game.copy(holding = game.holding + (playerId -> (game.holding(playerId) ++ List(objectId))),
-            chain = PlayerPickAct(playerId, objectId) :: game.chain)
-          objectId
+          game.map.rooms(roomIdx) = room.copy(objects = room.objects.filter(_ != objectId))
+          games += (gameId -> game.copy(
+            holding = game.holding + (playerId -> (game.holding(playerId) ++ List(objectId))),
+            chain = PlayerPickAct(playerId, objectId) :: game.chain))
+          s"$objectId"
         } else {
           "400 object is not there"
         }
