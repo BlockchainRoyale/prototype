@@ -169,7 +169,7 @@ function playerInformation() {
     var cardText = document.getElementById("playerCards");
     var i = document.getElementById("playerInfoInput").value;
     document.getElementById("playerInfoInput").max = playerInfo[i].length;
-    nameText.innerHTML = playerInfo[i][0] + "<br>" + "Location: (" + playerInfo[i][1] + ", " + playerInfo[i][2] + ")";
+    nameText.innerHTML = "<p>" + playerInfo[i][0] + "<br>" + "Location: <br>(" + playerInfo[i][1] + ", " + playerInfo[i][2] + ")</p>";
     cardText.innerHTML = '';
     for (let x = 4; x < playerInfo[i].length; x++) {
         cardText.innerHTML += playerInfo[i][x] + '<br>';
