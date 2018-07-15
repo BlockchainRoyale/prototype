@@ -194,7 +194,7 @@ object GameLogic {
       for (y <- 0.to(MAP_SIZE - 1)) {
         val coord = Tuple2(x, y)
         val room = Room(coord, objectsAtRoom.getOrElse(coord, List()), initialPos.getOrElse(coord, List()), true)
-        rooms += coord -> room
+        rooms += (coord -> room)
       }
     }
 
@@ -538,9 +538,9 @@ object GameUtils {
     }
 
     val rows = new JSONArray()
-    for (r <- 0.to(4)) {
+    for (r <- 0.to(MAP_SIZE)) {
       val row = new JSONArray()
-      for (c <- 0.to(4)) {
+      for (c <- 0.to(MAP_SIZE)) {
         val roomObj = new JSONObject()
         roomObj.put("row", r)
         roomObj.put("col", c)
