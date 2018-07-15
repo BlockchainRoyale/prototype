@@ -179,6 +179,19 @@ function swapCanvas() {
     }
 }
 
+var turncount = 0;
+var playtimer;
+var drawingArena = false;
+function redrawArena(){
+    if(!drawingArena){
+        drawingArena = true;
+        battleAnimate();
+        playTimer = setInterval(playArena, 1000);
+        return;
+    }
+    drawingArena = false;
+}
+
 function drawArena() {
     var arena = document.getElementById("arena");
     var ctx = arena.getContext("2d");
@@ -197,38 +210,114 @@ function drawArena() {
     ctx.stroke();
 }
 
-var battleInput1 = ["up", "down", "shoot", "left", "shoot", 3];
-var battleInput2 = ["left", "left", "shoot", "right", "shoot", 1];
-var battleloc1 = [0,0];
-var battleloc2 = [3, 5];
+var battleInput1 = ["up", "down", "shoot", "left", "left"];
+var battleInput2 = ["left", "left", "shoot", "right", "shoot"];
+var battleloc1 = [1, 1];
+var battleloc2 = [3, 4];
+var p1shoot = false;
+var p2shoot = false;
 
 function playArena() {
-    for(let i=0; i<battleInput1.length; i++){
-        switch(battleInput1[i]){
-            case "up":
-                battleloc1[1]++;
-                battleloc1[1] = over(battleloc1[1]);
-                break;
-            case "right":
-                battleloc1[0]++;
-                battleloc1[0] = over(battleloc1[0]);
-            case "down":
-                battleloc1[0]--;
-                battleloc1[0] = over(battleloc1[0]);
-            case "left":
-                battleloc1[0]++;
-                battleloc1[0] = over(battleloc1[0]);
-            case "shoot":
-        }
+    drawArena();
+    p1Moves(turncount);
+    p2Moves(turncount);
+    battleAnimate();
+    turncount++;
+    if(turncount>4){
+        turncount = 0;
+        clearInterval(playTimer);
+    }
+}
+
+function battleAnimate() {
+    var arena = document.getElementById("arena");
+    var ctx = arena.getContext("2d");
+    ctx.clearRect(0,0,arena.width, arena.height);
+    drawArena();
+
+    if(p1shoot){
+        ctx.fillStyle = "red";
+    }else{
+        ctx.fillStyle = "green";
+    }
+
+    ctx.beginPath();
+    console.log(battleloc1[0]  + " , " + battleloc1[1]);
+    ctx.arc((battleloc1[0] * ASIZE) + (ASIZE)/2,(battleloc1[1] * ASIZE) + (ASIZE)/2, AICONSIZE, 0, Math.PI*2);
+    ctx.fill();
+
+    if(p2shoot){
+        ctx.fillStyle = "red";
+    }else{
+        ctx.fillStyle = "green";
+    }
+    ctx.beginPath();
+    console.log(battleloc2[0]  + " , " + battleloc2[1]);
+    ctx.arc((battleloc2[0] * ASIZE) + (ASIZE)/2,(battleloc2[1] * ASIZE) + (ASIZE)/2, AICONSIZE, 0, Math.PI*2);
+    ctx.fill();
+
+    p1shoot = false;
+    p2shoot = false;
+}
+
+function p1Moves(i) {
+    console.log(battleInput1[i]);
+    switch(battleInput1[i]){
+        case "up":
+            battleloc1[1]--;
+            battleloc1[1] = over(battleloc1[1]);
+            break;
+        case "right":
+            battleloc1[0]++;
+            battleloc1[0] = over(battleloc1[0]);
+            break;
+        case "down":
+            battleloc1[1]++;
+            battleloc1[1] = over(battleloc1[1]);
+            break;
+        case "left":
+            battleloc1[0]--;
+            battleloc1[0] = over(battleloc1[0]);
+            break;
+        case "shoot":
+            p1shoot = true;
+            break;
+    }
+}
+
+function p2Moves(i) {
+    console.log(battleInput2[i]);
+    switch(battleInput2[i]){
+        case "up":
+            battleloc2[1]--;
+            battleloc2[1] = over(battleloc2[1]);
+            break;
+        case "right":
+            battleloc2[0]++;
+            battleloc2[0] = over(battleloc2[0]);
+            break;
+        case "down":
+            battleloc2[1]++;
+            battleloc2[1] = over(battleloc2[1]);
+            break;
+        case "left":
+            battleloc2[0]--;
+            battleloc2[0] = over(battleloc2[0]);
+
+            break;
+        case "shoot":
+            p2shoot = true;
+            break;
     }
 }
 
 function over(inNum) {
-    if(inNum>4 ){
+    if(inNum > 4 ){
         return 0;
-    }else if(inNum<0){
+    }else if(inNum < 0){
         return 4;
     }
+    return inNum;
 }
 /*
 function hash() {
