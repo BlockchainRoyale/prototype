@@ -14,7 +14,7 @@ var dummyData = [
 
 //Player Locations are stored here
 var playerLocations = [
-    [0, 0, 2],
+    [0, 0, 0],
     [0, 1, 0],
     [0, 2, 0],
     [0, 3, 0],
@@ -23,26 +23,26 @@ var playerLocations = [
     [0, 6, 0],
     [1, 0, 0],
     [1, 1, 0],
-    [1, 2, 3],
+    [1, 2, 2],
     [1, 3, 0],
     [1, 4, 0],
-    [1, 5, 4],
+    [1, 5, 0],
     [1, 6, 0],
-    [2, 0, 3],
+    [2, 0, 0],
     [2, 1, 0],
     [2, 2, 0],
     [2, 3, 0],
-    [2, 4, 4],
+    [2, 4, 0],
     [2, 5, 0],
     [2, 6, 0],
-    [3, 0, 2],
+    [3, 0, 0],
     [3, 1, 0],
-    [3, 2, 3],
+    [3, 2, 0],
     [3, 3, 0],
     [3, 4, 0],
     [3, 5, 0],
     [3, 6, 0],
-    [4, 0, 4],
+    [4, 0, 1],
     [4, 1, 0],
     [4, 2, 0],
     [4, 3, 0],
@@ -51,17 +51,17 @@ var playerLocations = [
     [4, 6, 0],
     [5, 0, 0],
     [5, 1, 0],
-    [5, 2, 3],
-    [5, 3, 2],
+    [5, 2, 0],
+    [5, 3, 1],
     [5, 4, 0],
     [5, 5, 0],
     [5, 6, 0],
     [6, 0, 0],
     [6, 1, 0],
-    [6, 2, 1],
+    [6, 2, 0],
     [6, 3, 0],
     [6, 4, 0],
-    [6, 5, 5],
+    [6, 5, 0],
     [6, 6, 0],
 
 ];
@@ -105,36 +105,46 @@ function findLocation() {
     var out = yourLocation[0] * 7 + yourLocation[1];
 }
 
-function moveUp(){
-    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
-    yourLocation[1]--;
-    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
-    battleRequests();
-    mapRedraw();
+
+function moveUp() {
+    if (yourLocation[1] > 0) {
+        playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
+        yourLocation[1]--;
+        playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
+        battleRequests();
+        mapRedraw();
+    }
 }
 
-function moveRight(){
-    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
-    yourLocation[0]++
-    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
-    battleRequests();
-    mapRedraw();
+function moveRight() {
+    if (yourLocation[0] < 6) {
+        playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
+        yourLocation[0]++
+        playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
+        battleRequests();
+        mapRedraw();
+    }
 }
 
-function moveDown(){
-    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
-    yourLocation[1]++;
-    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
-    battleRequests();
-    mapRedraw();
+function moveDown() {
+    if (yourLocation[1] < 6) {
+        playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
+        yourLocation[1]++;
+        playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
+        battleRequests();
+        mapRedraw();
+    }
 }
 
-function moveLeft(){
-    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
-    yourLocation[0]--
-    playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
-    battleRequests();
-    mapRedraw();
+function moveLeft() {
+    if (yourLocation[0] > 0) {
+        playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]--;
+        yourLocation[0]--
+        playerLocations[yourLocation[0] * 7 + yourLocation[1]][2]++;
+        battleRequests();
+        mapRedraw();
+    }
+
 }
 
 function mapRedraw() {
@@ -212,11 +222,13 @@ function drawPlayerLocations() {
     }
 }
 
-function submitInputs(){
+function submitInputs() {
     var textArea = document.getElementById("inputTextArea");
     var stuff = textArea.value;
     textArea.value = '';
-
+    var inputArray = stuff.split(" ");
+    battleInput2 = inputArray;
+    console.log(inputArray);
 }
 
 function playerInfoSetup() {
